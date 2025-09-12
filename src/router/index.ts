@@ -4,12 +4,16 @@
  * @Author: GaoMingze
  * @Date: 2025-09-12 17:13:29
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-12 18:00:59
+ * @LastEditTime: 2025-09-12 20:30:37
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginLayout from '../layouts/LoginLayout.vue'
 
 const routes = [
+    {
+        path: '/',
+        redirect: '/login',
+    },
     {
         path: '/',
         component: LoginLayout, // 使用布局组件

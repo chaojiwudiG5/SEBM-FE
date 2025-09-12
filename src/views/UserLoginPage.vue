@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-09-12 17:12:14
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-12 18:07:25
+ * @LastEditTime: 2025-09-12 20:59:36
 -->
 <template>
     <van-form @submit="onSubmit">
@@ -12,20 +12,26 @@
             v-model="form.username"
             label="用户名"
             placeholder="请输入用户名"
-            required
+            :rules="[{ required: true, message: '请输入用户名' }]"
         />
         <van-field
             v-model="form.password"
             type="password"
             label="密码"
             placeholder="请输入密码"
-            required
+            :rules="[{ required: true, message: '请输入密码' }]"
         />
-        <div style="margin: 16px">
+        <div class="button-group">
             <van-button type="primary" block native-type="submit"
                 >登录</van-button
             >
-            <van-button type="plain" block @click="toRegister">注册</van-button>
+            <van-button
+                type="plain"
+                block
+                @click="toRegister"
+                style="margin-top: 4px"
+                >注册</van-button
+            >
         </div>
     </van-form>
 </template>
@@ -55,5 +61,9 @@ const toRegister = () => {
 </script>
 
 <style scoped>
-/* 可根据需求添加自定义样式 */
+.button-group {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+}
 </style>

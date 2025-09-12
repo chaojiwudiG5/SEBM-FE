@@ -1,0 +1,59 @@
+<!--
+ * @Description: 
+ * @version: v1.0.0
+ * @Author: GaoMingze
+ * @Date: 2025-09-12 17:12:14
+ * @LastEditors: GaoMingze
+ * @LastEditTime: 2025-09-12 18:07:25
+-->
+<template>
+    <van-form @submit="onSubmit">
+        <van-field
+            v-model="form.username"
+            label="用户名"
+            placeholder="请输入用户名"
+            required
+        />
+        <van-field
+            v-model="form.password"
+            type="password"
+            label="密码"
+            placeholder="请输入密码"
+            required
+        />
+        <div style="margin: 16px">
+            <van-button type="primary" block native-type="submit"
+                >登录</van-button
+            >
+            <van-button type="plain" block @click="toRegister">注册</van-button>
+        </div>
+    </van-form>
+</template>
+
+<script setup>
+import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const form = reactive({
+    username: '',
+    password: '',
+})
+
+const onSubmit = () => {
+    if (!form.username || !form.password) {
+        alert('请填写用户名和密码')
+        return
+    }
+    // 这里可以调用 API 登录
+    alert(`用户名: ${form.username}, 密码: ${form.password}`)
+}
+const toRegister = () => {
+    // 跳转到注册页面
+    router.push('/register')
+}
+</script>
+
+<style scoped>
+/* 可根据需求添加自定义样式 */
+</style>

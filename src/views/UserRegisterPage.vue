@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-09-12 17:57:44
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-12 20:57:53
+ * @LastEditTime: 2025-09-21 23:40:59
 -->
 <template>
     <van-form @submit="onSubmit">
@@ -12,12 +12,15 @@
         <van-field
             v-model="form.username"
             name="username"
-            label="用户名"
-            placeholder="请输入用户名"
+            label="Username"
+            placeholder="Please enter your username"
             required
             :rules="[
-                { required: true, message: '请输入用户名' },
-                { pattern: /^.{6,20}$/, message: '用户名长度应在 6-20 位之间' },
+                { required: true, message: 'Please enter your username' },
+                {
+                    pattern: /^.{6,20}$/,
+                    message: 'Username length should be between 6 and 20',
+                },
             ]"
         />
 
@@ -26,12 +29,15 @@
             v-model="form.password"
             name="password"
             type="password"
-            label="密码"
-            placeholder="请输入密码"
+            label="Password"
+            placeholder="Please enter your password"
             required
             :rules="[
-                { required: true, message: '请输入密码' },
-                { pattern: /^.{8,20}$/, message: '密码长度应该在 8-20 位间' },
+                { required: true, message: 'Please enter your password' },
+                {
+                    pattern: /^.{8,20}$/,
+                    message: 'Password length should be between 8 and 20',
+                },
             ]"
         />
 
@@ -40,14 +46,14 @@
             v-model="form.confirmPassword"
             name="confirmPassword"
             type="password"
-            label="确认密码"
-            placeholder="请再次输入密码"
+            label="Confirm Password"
+            placeholder="Please confirm your password"
             required
             :rules="[
-                { required: true, message: '请确认密码' },
+                { required: true, message: 'Please confirm your password' },
                 {
                     validator: validateConfirmPassword,
-                    message: '两次输入的密码不一致',
+                    message: 'Passwords do not match',
                 },
             ]"
         />
@@ -56,21 +62,20 @@
         <van-field
             v-model="form.email"
             name="email"
-            type="email"
-            label="邮箱"
-            placeholder="请输入邮箱"
+            label="Email"
+            placeholder="Please enter your email"
             :rules="[
-                { required: true, message: '请输入邮箱' },
+                { required: true, message: 'Please enter your email' },
                 {
                     pattern: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-                    message: '请输入正确的邮箱地址',
+                    message: 'Please enter a valid email address',
                 },
             ]"
         />
 
         <div style="margin-top: 16px">
             <van-button type="primary" block native-type="submit"
-                >注册</van-button
+                >Register</van-button
             >
             <van-button
                 block
@@ -78,7 +83,7 @@
                 @click="$router.push('/login')"
                 style="margin-top: 4px"
             >
-                返回登录
+                Return to Login
             </van-button>
         </div>
     </van-form>

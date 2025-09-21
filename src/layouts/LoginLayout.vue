@@ -4,11 +4,13 @@
  * @Author: GaoMingze
  * @Date: 2025-09-12 17:16:00
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-12 20:39:49
+ * @LastEditTime: 2025-09-22 00:09:32
 -->
 <template>
     <div class="login-layout">
-        <van-image :src="logo" round width="6rem" height="6rem"></van-image>
+        <div class="logo">
+            <van-image :src="logo" round width="6rem" height="6rem"></van-image>
+        </div>
         <div class="login-container">
             <router-view />
             <!-- 渲染登录页面 -->
@@ -20,4 +22,12 @@
 import logo from '../assets/logo.svg'
 </script>
 
-<style scoped></style>
+<style scoped>
+.login-layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+</style>

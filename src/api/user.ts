@@ -1,17 +1,94 @@
-/*
- * @Description:
- * @version: v1.0.0
- * @Author: GaoMingze
- * @Date: 2025-09-12 17:48:33
- * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-12 17:55:14
- */
-import myAxios from './index'
+// @ts-ignore
+/* eslint-disable */
+import request from '../axios/request'
 
-export const login = (data: any) => {
-    return myAxios.post('/login', data)
+/** 此处后端没有提供注释 POST /user/admin/deleteUser */
+export async function deleteUser(
+    body: API.DeleteDto,
+    options?: { [key: string]: any }
+) {
+    return request<API.BaseResponseBoolean>('/user/admin/deleteUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: body,
+        ...(options || {}),
+    })
 }
 
-export const register = (data: any) => {
-    return myAxios.post('/register', data)
+/** 此处后端没有提供注释 POST /user/admin/getUserList */
+export async function getAllUsers(
+    body: API.PageDto,
+    options?: { [key: string]: any }
+) {
+    return request<API.BaseResponsePageUserVo>('/user/admin/getUserList', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: body,
+        ...(options || {}),
+    })
+}
+
+/** 此处后端没有提供注释 GET /user/getCurrentUser */
+export async function getCurrentUser(options?: { [key: string]: any }) {
+    return request<API.BaseResponseUserVo>('/user/getCurrentUser', {
+        method: 'GET',
+        ...(options || {}),
+    })
+}
+
+/** 此处后端没有提供注释 POST /user/login */
+export async function userLogin(
+    body: API.LoginDto,
+    options?: { [key: string]: any }
+) {
+    return request<API.BaseResponseUserVo>('/user/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: body,
+        ...(options || {}),
+    })
+}
+
+/** 此处后端没有提供注释 POST /user/logout */
+export async function userLogout(options?: { [key: string]: any }) {
+    return request<API.BaseResponseBoolean>('/user/logout', {
+        method: 'POST',
+        ...(options || {}),
+    })
+}
+
+/** 此处后端没有提供注释 POST /user/register */
+export async function userRegister(
+    body: API.RegisterDto,
+    options?: { [key: string]: any }
+) {
+    return request<API.BaseResponseLong>('/user/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: body,
+        ...(options || {}),
+    })
+}
+
+/** 此处后端没有提供注释 POST /user/updateUser */
+export async function updateUser(
+    body: API.UpdateDto,
+    options?: { [key: string]: any }
+) {
+    return request<API.BaseResponseUserVo>('/user/updateUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: body,
+        ...(options || {}),
+    })
 }

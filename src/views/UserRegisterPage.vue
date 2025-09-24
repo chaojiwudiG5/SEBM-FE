@@ -1,10 +1,10 @@
 <!--
- * @Description: 用户注册页面
+ * @Description: 
  * @version: v1.0.0
  * @Author: GaoMingze
- * @Date: 2025-09-12 17:57:44
+ * @Date: 2025-09-21 23:24:49
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-21 23:40:59
+ * @LastEditTime: 2025-09-25 00:18:06
 -->
 <template>
     <van-form @submit="onSubmit">
@@ -23,7 +23,6 @@
                 },
             ]"
         />
-
         <!-- 密码 -->
         <van-field
             v-model="form.password"
@@ -40,46 +39,42 @@
                 },
             ]"
         />
-
         <!-- 确认密码 -->
         <van-field
-            v-model="form.confirmPassword"
-            name="confirmPassword"
+            v-model="form.checkPassword"
+            name="checkPassword"
             type="password"
-            label="Confirm Password"
-            placeholder="Please confirm your password"
+            label="Check Password"
+            placeholder="Please check your password"
             required
             :rules="[
-                { required: true, message: 'Please confirm your password' },
+                { required: true, message: 'Please check your password' },
                 {
                     validator: validateConfirmPassword,
                     message: 'Passwords do not match',
                 },
             ]"
         />
-
-        <!-- 邮箱 -->
         <van-field
-            v-model="form.email"
-            name="email"
-            label="Email"
-            placeholder="Please enter your email"
+            v-model="form.phone"
+            name="phone"
+            label="Phone"
+            placeholder="Please enter your phone number"
             :rules="[
-                { required: true, message: 'Please enter your email' },
+                { required: true, message: 'Please enter your phone number' },
                 {
-                    pattern: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-                    message: 'Please enter a valid email address',
+                    pattern: /^1[3-9]\d{9}$/,
+                    message: 'Please enter a valid phone number',
                 },
             ]"
         />
-
         <div style="margin-top: 16px">
             <van-button type="primary" block native-type="submit"
                 >Register</van-button
             >
             <van-button
                 block
-                type="danger"
+                type="default"
                 @click="$router.push('/login')"
                 style="margin-top: 4px"
             >
@@ -88,41 +83,37 @@
         </div>
     </van-form>
 </template>
-
 <script lang="ts" setup>
 import { reactive } from 'vue'
-import { register } from '../api/user'
-
+import { userRegister } from '../api/user'
+import { showNotify } from 'vant'
+import router from '../router'
 // 表单数据
-const form = reactive({
+const form: API.RegisterDto = reactive({
     username: '',
     password: '',
-    confirmPassword: '',
-    email: '',
+    checkPassword: '',
+    phone: '',
 })
-
 // 自定义校验规则：确认密码
 const validateConfirmPassword = (val: string) => {
     return val === form.password
 }
-
 // 表单提交
 const onSubmit = async () => {
     try {
-        const res = await register({
-            username: form.username,
-            password: form.password,
-            email: form.email,
-        })
-        alert('注册成功！')
-        console.log(res)
-        // this.$router.push('/login') 也可以加跳转
-    } catch (err: any) {
-        alert(err?.message || '注册失败')
+        const res = await userRegister(form)
+        if (res != null) {
+            console.log(res)
+            showNotify('注册成功')
+            router.push('/login')
+        }
+    } catch (error) {
+        console.log(error)
+        showNotify('注册失败')
     }
 }
 </script>
-
 <style scoped>
 /* 可以根据需求调整样式 */
 </style>

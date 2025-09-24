@@ -50,6 +50,13 @@ const routes = [
                 component: () => import('../views/sebm/UserInfoPage.vue'),
                 meta: { title: 'UserInfo' },
             },
+            // 用户信息编辑页
+            {
+                path: 'userinfoedit',
+                name: 'UserInfoEdit',
+                component: () => import('../views/sebm/UserInfoEditPage.vue'),
+                meta: { title: 'Edit User Info' },
+            },
             // 设备页
             {
                 path: 'device',

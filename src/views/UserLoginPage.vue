@@ -2,9 +2,9 @@
  * @Description: 
  * @version: v1.0.0
  * @Author: GaoMingze
- * @Date: 2025-09-12 17:12:14
+ * @Date: 2025-09-21 23:24:49
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-21 23:41:30
+ * @LastEditTime: 2025-09-25 00:18:16
 -->
 <template>
     <van-form @submit="onSubmit">
@@ -26,7 +26,7 @@
                 >Login</van-button
             >
             <van-button
-                type="plain"
+                type="default"
                 block
                 @click="toRegister"
                 style="margin-top: 4px"
@@ -35,26 +35,25 @@
         </div>
     </van-form>
 </template>
-
-<script setup>
+<script setup lang="ts">
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { userLogin } from '../api/user'
+import { useUserStore } from '../store/user'
 const router = useRouter()
-const form = reactive({
-    username: '',
-    password: '',
-})
-
-const onSubmit = () => {
-    router.push('/sebm')
+const userStore = useUserStore()
+const form: API.LoginDto = reactive({ username: '', password: '' })
+const onSubmit = async () => {
+    const userVo = await userLogin(form)
+    console.log(userVo) //@ts-ignore
+    userStore.setUserInfo(userVo as API.UserVo)
+    router.push('/sebm/home')
 }
 const toRegister = () => {
     // 跳转到注册页面
     router.push('/register')
 }
 </script>
-
 <style scoped>
 .button-group {
     margin-top: 16px;

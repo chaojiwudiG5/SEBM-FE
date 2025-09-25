@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-09-21 23:32:51
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-25 23:15:23
+ * @LastEditTime: 2025-09-25 23:13:17
 -->
 <template>
     <van-nav-bar :title="title" fixed>
@@ -36,8 +36,9 @@ const showScan = ref(false)
 const hasCameraPermission = ref(true)
 
 const onDetect = (result: any) => {
+    console.log(result)
     showScan.value = false
-    showNotify({ type: 'success', message: `扫描结果: ${result[0].rawValue}` })
+    showNotify({ type: 'success', message: `扫描结果: ${result}` })
     // 这里可以添加对扫描结果的处理逻辑
     // 例如跳转到对应页面或执行其他操作
 }

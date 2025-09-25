@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-09-21 23:24:49
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-25 22:28:12
+ * @LastEditTime: 2025-09-25 00:18:16
 -->
 <template>
     <van-form @submit="onSubmit">
@@ -47,11 +47,7 @@ const onSubmit = async () => {
     const userVo = await userLogin(form)
     console.log(userVo) //@ts-ignore
     userStore.setUserInfo(userVo as API.UserVo)
-    if (userStore.userInfo?.userRole === 2) {
-        router.push('/sebm/mechanic/tasks')
-    } else {
-        router.push('/sebm/user/home')
-    }
+    router.push('/sebm/home')
 }
 const toRegister = () => {
     // 跳转到注册页面

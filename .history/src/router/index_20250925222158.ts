@@ -4,13 +4,11 @@
  * @Author: GaoMingze
  * @Date: 2025-09-12 17:13:29
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-25 22:46:22
+ * @LastEditTime: 2025-09-22 01:04:47
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginLayout from '../layouts/LoginLayout.vue'
 import BasicLayout from '../layouts/BasicLayout.vue'
-import { useUserStore } from '../store/user'
-import { showNotify } from 'vant'
 
 const routes = [
     {
@@ -33,11 +31,10 @@ const routes = [
             },
         ],
     },
-    // 普通用户布局
+    // 主应用布局 (包含Tabbar页面)
     {
-        path: '/sebm/user',
+        path: '/sebm',
         component: BasicLayout,
-        meta: { requiresAuth: true, role: 1 }, // 普通用户role为1
         children: [
             // 首页
             {
@@ -74,71 +71,30 @@ const routes = [
                 component: () => import('../views/sebm/MessageBoxPage.vue'),
                 meta: { title: 'MessageBox' },
             },
-        ],
-    },
-    // 技工布局
-    {
-        path: '/sebm/mechanic',
-        component: BasicLayout,
-        meta: { requiresAuth: true, role: 2 }, // 技工role为2
-        children: [
-            // 任务页
+            // 任务页 (技工专用)
             {
                 path: 'tasks',
                 name: 'Tasks',
                 component: () => import('../views/sebm/TasksPage.vue'),
                 meta: { title: 'Tasks' },
             },
-            // 技工用户主页
-            {
-                path: 'userinfo',
-                name: 'MechanicUserInfo',
-                component: () => import('../views/sebm/UserInfoPage.vue'),
-                meta: { title: 'UserInfo' },
-            },
         ],
     },
     // 404处理
     {
         path: '/:pathMatch(.*)*',
-        redirect: (to: any) => {
+        redirect: (to) => {
             const userStore = useUserStore()
-            return userStore.userInfo?.userRole === 2
-                ? '/sebm/tasks'
+            return userStore.userInfo?.userRole === 2 
+                ? '/sebm/tasks' 
                 : '/sebm/home'
-        },
+        }
     },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
-})
-
-router.beforeEach((to, from, next) => {
-    const userStore = useUserStore()
-
-    // 不需要认证的路由直接放行
-    if (!to.meta.requiresAuth) {
-        return next()
-    }
-
-    // 检查用户是否登录
-    if (!userStore.userInfo) {
-        return next('/login')
-    }
-
-    // 检查用户角色是否匹配路由要求的角色
-    if (to.meta.role && userStore.userInfo.userRole !== to.meta.role) {
-        showNotify({ type: 'danger', message: '非法路径' })
-        return next(
-            userStore.userInfo.userRole === 2
-                ? '/sebm/mechanic/tasks'
-                : '/sebm/user/home'
-        )
-    }
-
-    next()
 })
 
 export default router

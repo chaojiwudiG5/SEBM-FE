@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-09-12 17:07:43
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-25 22:30:36
+ * @LastEditTime: 2025-09-12 17:41:36
  */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -21,6 +21,6 @@ const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
 app.use(Vant)
-app.use(pinia)
 app.use(router)
+app.use(pinia)
 app.mount('#app')

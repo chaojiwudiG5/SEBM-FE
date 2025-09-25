@@ -8,21 +8,37 @@
 -->
 <template>
     <van-tabbar route>
-        <van-tabbar-item replace to="/sebm/home" icon="home-o"
-            >Home</van-tabbar-item
-        >
-        <van-tabbar-item replace to="/sebm/device" icon="desktop-o"
-            >Device</van-tabbar-item
-        >
-        <van-tabbar-item replace to="/sebm/messagebox" icon="chat-o"
-            >Message</van-tabbar-item
-        >
-        <van-tabbar-item replace to="/sebm/userinfo" icon="user-o"
-            >User</van-tabbar-item
-        >
+        <template v-if="userRole === 2">
+            <van-tabbar-item replace to="/sebm/mechanic/tasks" icon="todo-list-o"
+                >Tasks</van-tabbar-item
+            >
+            <van-tabbar-item replace to="/sebm/mechanic/userinfo" icon="user-o"
+                >User</van-tabbar-item
+            >
+        </template>
+        <template v-else>
+            <van-tabbar-item replace to="/sebm/user/home" icon="home-o"
+                >Home</van-tabbar-item
+            >
+            <van-tabbar-item replace to="/sebm/user/device" icon="desktop-o"
+                >Device</van-tabbar-item
+            >
+            <van-tabbar-item replace to="/sebm/user/messagebox" icon="chat-o"
+                >Message</van-tabbar-item
+            >
+            <van-tabbar-item replace to="/sebm/user/userinfo" icon="user-o"
+                >User</van-tabbar-item
+            >
+        </template>
     </van-tabbar>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { computed } from 'vue'
+import { useUserStore } from '../store/user'
+
+const userStore = useUserStore()
+const userRole = computed(() => userStore.userInfo?.userRole)
+</script>
 
 <style scoped></style>

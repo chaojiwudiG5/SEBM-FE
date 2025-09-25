@@ -48,9 +48,9 @@ const onSubmit = async () => {
     console.log(userVo) //@ts-ignore
     userStore.setUserInfo(userVo as API.UserVo)
     if (userStore.userInfo?.userRole === 2) {
-        router.push('/sebm/mechanic/tasks')
+        router.push('/sebm/tasks')
     } else {
-        router.push('/sebm/user/home')
+        router.push('/sebm/home')
     }
 }
 const toRegister = () => {

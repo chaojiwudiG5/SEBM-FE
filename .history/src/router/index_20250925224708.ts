@@ -11,7 +11,6 @@ import LoginLayout from '../layouts/LoginLayout.vue'
 import BasicLayout from '../layouts/BasicLayout.vue'
 import { useUserStore } from '../store/user'
 import { showNotify } from 'vant'
-
 const routes = [
     {
         path: '/',

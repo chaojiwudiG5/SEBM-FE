@@ -84,6 +84,7 @@ declare namespace API {
     age?: number;
     createTime?: string;
     updateTime?: string;
+    token?: string;
     active?: boolean;
   };
 }

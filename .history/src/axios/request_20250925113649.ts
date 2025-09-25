@@ -8,7 +8,7 @@ import { showNotify } from 'vant'
 
 // 创建 Axios 实例
 const myAxios = axios.create({
-    baseURL: 'http://localhost:29578', // 修改为你的后端地址
+    baseURL: 'https://localhost:29578', // 修改为你的后端地址
     timeout: 60000,
     // JWT 不需要 withCredentials
     // withCredentials: true,

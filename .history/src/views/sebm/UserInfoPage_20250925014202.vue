@@ -58,7 +58,7 @@
                 type="danger"
                 block
                 round
-                size="large"
+                size="normal"
                 @click="handleLogout"
                 class="logout-btn"
             >
@@ -73,6 +73,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showNotify } from 'vant'
 import { useUserStore } from '../../store/user'
+import { userLogout } from '../../api/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -100,8 +101,9 @@ const formatStatus = (status: number | undefined) => {
     return status === 0 ? 'Active' : 'Inactive'
 }
 
-const handleLogout = () => {
+const handleLogout = async () => {
     try {
+        await userLogout()
         //@ts-ignore
         userStore.clearUserInfo()
         router.push('/login')
@@ -125,6 +127,5 @@ const navigateToEdit = (field: string, value: any) => {
 <style scoped>
 .action-buttons {
     margin-top: 20px;
-    padding: 12px;
 }
 </style>

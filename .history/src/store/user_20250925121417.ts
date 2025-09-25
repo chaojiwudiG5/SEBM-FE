@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-09-24 21:29:14
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-09-25 12:18:04
+ * @LastEditTime: 2025-09-24 23:18:37
  */
 import { defineStore } from 'pinia'
 import { getCurrentUser } from '../api/user'
@@ -25,16 +25,12 @@ export const useUserStore = defineStore('user', {
 
         clearUserInfo() {
             this.userInfo = null
-            localStorage.removeItem('token')
         },
 
         async loadFromServer() {
             try {
                 const res = await getCurrentUser() // 调用后端接口获取 session 用户信息
                 this.userInfo = res as API.UserVo
-                if (this.userInfo.token) {
-                    localStorage.setItem('token', this.userInfo.token)
-                }
             } catch (err) {
                 this.userInfo = null
                 showNotify('获取用户信息失败')

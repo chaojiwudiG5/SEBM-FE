@@ -276,7 +276,7 @@ const handleSubmit = async () => {
         
         const borrowData: API.BorrowRecordAddDto = {
             userId: userStore.userInfo!.id!,
-            deviceId: deviceId.value! as any,
+            deviceId: deviceId.value!,
             borrowTime: formData.value.borrowTime,
             dueTime: formData.value.dueTime,
             remarks: formData.value.remarks || undefined

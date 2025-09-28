@@ -31,7 +31,13 @@ export const useUserStore = defineStore('user', {
         async loadFromServer() {
             try {
                 const res = await getCurrentUser()
-                this.userInfo = res as API.UserVo
+                // 确保ID字段是字符串类型，避免精度丢失
+                const processedUserVo: API.UserVo = {
+                    ...res,
+                    id: res.id ? String(res.id) : res.id,
+                    userId: res.userId ? String(res.userId) : res.userId
+                }
+                this.userInfo = processedUserVo
                 if (this.userInfo.token) {
                     localStorage.setItem('token', this.userInfo.token)
                 }

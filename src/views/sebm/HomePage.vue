@@ -10,37 +10,66 @@
     <div class="home-page">
         <!-- 借还状态概览 -->
         <div class="borrow-overview">
-            <div class="circle-section">
-                <van-circle
-                    :rate= "100"
-                    :speed="30"
-                    :text="`${usingCount}/${MaxBorrowedCount}`"
-                    :current-rate="borrowRate"
-                    stroke-width="32"
-                    color="#1989fa"
-                    layer-color="#f0f0f0"
-                    size="120"
-                />
-                <div class="circle-label">Borrowed Rate ({{ borrowRate }}%)</div>
+            <div class="circles-section">
+                <div class="circle-item">
+                    <van-circle
+                        :rate="100"
+                        :speed="30"
+                        :text="`${usingCount}/${MaxBorrowedCount}`"
+                        :current-rate="borrowRate"
+                        stroke-width="24"
+                        color="#1989fa"
+                        layer-color="#f0f0f0"
+                        size="100"
+                    />
+                    <div class="circle-label">Borrowed</div>
+                </div>
+                <div class="circle-item">
+                    <van-circle
+                        :rate="100"
+                        :speed="30"
+                        :text="`${reservedCount}/${MaxReservedCount}`"
+                        :current-rate="reservedRate"
+                        stroke-width="24"
+                        color="#ff6b35"
+                        layer-color="#f0f0f0"
+                        size="100"
+                    />
+                    <div class="circle-label">Reserved</div>
+                </div>
             </div>
             <div class="info-section">
-                <div class="info-title">Borrowed Info</div>
+                <div class="info-title">Device Status Overview</div>
                 <div class="info-content">
-                    <div class="info-item">
-                        <span class="label">Current Borrowed:</span>
-                        <span class="value">{{ usingCount }} </span>
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="label">Current Borrowed:</span>
+                            <span class="value">{{ usingCount }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Max Borrowed:</span>
+                            <span class="value">{{ MaxBorrowedCount }}</span>
+                        </div>
                     </div>
-                    <div class="info-item">
-                        <span class="label">Max Borrowed:</span>
-                        <span class="value">{{ MaxBorrowedCount }} </span>
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="label">Current Reserved:</span>
+                            <span class="value-reserved">{{ reservedCount }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Max Reserved:</span>
+                            <span class="value-reserved">{{ MaxReservedCount }}</span>
+                        </div>
                     </div>
-                    <div class="info-item">
-                        <span class="label">Remaining:</span>
-                        <span class="value">{{ MaxBorrowedCount - usingCount }} </span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Overdue:</span>
-                        <span class="value-overdue">{{ overdueCount }} </span>
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="label">Remaining Borrow:</span>
+                            <span class="value">{{ MaxBorrowedCount - usingCount }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Overdue Times:</span>
+                            <span class="value-overdue">{{ overdueCount }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,7 +98,7 @@
                 </template>
                 <van-empty v-if="usingRecords.length === 0" description="No using devices" />
                 <div v-else>
-                    <van-card
+        <van-card
                         v-for="record in usingRecords"
                         :key="record.id"
                         :title="record.deviceName"
@@ -109,7 +138,7 @@
                 </template>
                 <van-empty v-if="returnedRecords.length === 0" description="No returned records" />
                 <div v-else>
-                    <van-card
+        <van-card
                         v-for="record in returnedRecords"
                         :key="record.id"
                         :title="record.deviceName"
@@ -152,10 +181,12 @@ import { getBorrowRecordListWithStatus } from '../../api/borrow'
 
 const userStore = useUserStore()
 
-// 常量定义：用户最大借用数量
-const MaxBorrowedCount = 3
+// 常量定义：用户最大借用数量和最大预约数量
+const MaxBorrowedCount = ref(userStore.userInfo?.maxBorrowedDeviceCount || 3)
+const MaxReservedCount = ref(userStore.userInfo?.maxReservedDeviceCount || 2)
 const overdueCount = ref(userStore.userInfo?.overdueTimes || 0)
 const usingCount = ref(userStore.userInfo?.borrowedDeviceCount || 0)
+const reservedCount = ref(userStore.userInfo?.reservedDeviceCount || 0)
 
 // 借用记录数据
 const usingRecords = ref<API.BorrowRecordVo[]>([])
@@ -163,8 +194,20 @@ const returnedRecords = ref<API.BorrowRecordVo[]>([])
 const usingLoading = ref(false)
 const returnedLoading = ref(false)
 
-// 折叠面板控制
-const activeCollapse = ref<string[]>(["using"])
+// 折叠面板控制 - 根据数据动态设置
+const activeCollapse = ref<string[]>([])
+
+// 计算哪些面板应该展开
+const updateActiveCollapse = () => {
+    const active: string[] = []
+    if (usingRecords.value.length > 0) {
+        active.push('using')
+    }
+    if (returnedRecords.value.length > 0) {
+        active.push('returned')
+    }
+    activeCollapse.value = active
+}
 
 // 分页相关数据
 const currentPage = ref(1)
@@ -173,8 +216,15 @@ const pageSize = 5
 
 // 计算借用比例（百分比）
 const borrowRate = computed(() => {
-    const rate = Math.round((usingCount.value / MaxBorrowedCount) * 100)
-    console.log('Borrow rate calculated:', rate, 'usingCount:', usingCount.value, 'MaxBorrowedCount:', MaxBorrowedCount)
+    const rate = Math.round((usingCount.value / MaxBorrowedCount.value) * 100)
+    console.log('Borrow rate calculated:', rate, 'usingCount:', usingCount.value, 'MaxBorrowedCount:', MaxBorrowedCount.value)
+    return rate
+})
+
+// 计算预约比例（百分比）
+const reservedRate = computed(() => {
+    const rate = Math.round((reservedCount.value / MaxReservedCount.value) * 100)
+    console.log('Reserved rate calculated:', rate, 'reservedCount:', reservedCount.value, 'MaxReservedCount:', MaxReservedCount.value)
     return rate
 })
 
@@ -219,6 +269,7 @@ const fetchUsingRecords = async () => {
         }
     } finally {
         usingLoading.value = false
+        updateActiveCollapse() // 更新折叠面板状态
     }
 }
 
@@ -255,6 +306,7 @@ const fetchReturnedRecords = async (page: number = 1) => {
         console.error('Failed to get returned records:', error)
     } finally {
         returnedLoading.value = false
+        updateActiveCollapse() // 更新折叠面板状态
     }
 }
 
@@ -325,32 +377,37 @@ onMounted(async () => {
 
 .borrow-overview {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px;
     margin-bottom: 12px;
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    gap: 24px;
+    gap: 20px;
 }
 
-.circle-section {
+.circles-section {
     display: flex;
     flex-direction: column;
-    align-items: center;
     flex-shrink: 0;
 }
 
+.circle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .circle-label {
-    margin-top: 12px;
-    font-size: 14px;
+    margin-top: 8px;
+    font-size: 12px;
     color: #646566;
     font-weight: 500;
 }
 
 .info-section {
     flex: 1;
-    padding-left: 16px;
+    padding-left: 8px;
 }
 
 .device-card{
@@ -385,15 +442,22 @@ onMounted(async () => {
 .info-content {
     display: flex;
     flex-direction: column;
+    gap: 8px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
     gap: 12px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
 .info-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 6px 0;
+    flex: 1;
 }
 
 .info-item:last-child {
@@ -414,6 +478,12 @@ onMounted(async () => {
 .value-overdue {
     font-size: 14px;
     color: #ff4d4f;
+    font-weight: 600;
+}
+
+.value-reserved {
+    font-size: 14px;
+    color: #ff6b35;
     font-weight: 600;
 }
 /* Cell Group 标题样式优化 */

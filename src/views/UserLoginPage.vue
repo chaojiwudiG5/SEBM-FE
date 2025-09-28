@@ -44,13 +44,36 @@ const router = useRouter()
 const userStore = useUserStore()
 const form: API.LoginDto = reactive({ username: '', password: '' })
 const onSubmit = async () => {
-    const userVo = await userLogin(form)
-    console.log(userVo) //@ts-ignore
-    userStore.setUserInfo(userVo as API.UserVo)
-    if (userStore.userInfo?.userRole === 2) {
-        router.push('/sebm/mechanic/tasks')
-    } else {
-        router.push('/sebm/user/home')
+    try {
+        const userVo = await userLogin(form)
+        console.log('Login response:', userVo)
+        
+        // 确保ID字段是字符串类型，避免精度丢失
+        const processedUserVo: API.UserVo = {
+            ...userVo,
+            id: userVo.id ? String(userVo.id) : userVo.id,
+            userId: userVo.userId ? String(userVo.userId) : userVo.userId
+        }
+        
+        userStore.setUserInfo(processedUserVo)
+        
+        // 根据用户角色跳转
+        if (userStore.userInfo?.userRole === 2) {
+            // 技工
+            router.push('/sebm/mechanic/tasks')
+        } else if (userStore.userInfo?.userRole === 0) {
+            // 普通用户
+            router.push('/sebm/user/home')
+        } else if (userStore.userInfo?.userRole === 1) {
+            // 管理员 - 暂时跳转到用户页面，后续可以添加管理员页面
+            router.push('/sebm/user/home')
+        } else {
+            // 未知角色
+            console.error('Unknown user role:', userStore.userInfo?.userRole)
+            router.push('/login')
+        }
+    } catch (error) {
+        console.error('Login failed:', error)
     }
 }
 const toRegister = () => {

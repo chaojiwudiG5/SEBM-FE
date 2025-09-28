@@ -41,6 +41,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseReservationVo = {
+    code?: number;
+    data?: ReservationVo;
+    message?: string;
+  };
+
   type BaseResponseUserVo = {
     code?: number;
     data?: UserVo;
@@ -48,8 +54,7 @@ declare namespace API {
   };
 
   type BorrowRecordAddDto = {
-    userId: number;
-    deviceId: number;
+    deviceId: string;
     borrowTime: string;
     dueTime: string;
     remarks?: string;
@@ -58,28 +63,27 @@ declare namespace API {
   type BorrowRecordQueryDto = {
     pageNumber: number;
     pageSize: number;
-    userId: number;
+    userId: string;
   };
 
   type BorrowRecordQueryWithStatusDto = {
     pageNumber: number;
     pageSize: number;
-    userId: number;
+    userId: string;
     status: number;
   };
 
   type BorrowRecordReturnDto = {
-    id: number;
-    userId: number;
+    id: string;
     returnTime?: string;
     remarks?: string;
   };
 
   type BorrowRecordVo = {
-    id?: number;
-    userId?: number;
+    id?: string;
+    userId?: string;
     userName?: string;
-    deviceId?: number;
+    deviceId?: string;
     deviceName?: string;
     image?: string;
     borrowTime?: string;
@@ -90,7 +94,7 @@ declare namespace API {
   };
 
   type DeleteDto = {
-    id: number;
+    id: string;
   };
 
   type DeviceAddDto = {
@@ -112,7 +116,7 @@ declare namespace API {
   };
 
   type DeviceUpdateDto = {
-    id: number;
+    id: string;
     deviceName: string;
     deviceType: string;
     status: number;
@@ -122,7 +126,7 @@ declare namespace API {
   };
 
   type DeviceVo = {
-    id?: number;
+    id?: string;
     deviceName?: string;
     deviceType?: string;
     status?: number;
@@ -132,7 +136,7 @@ declare namespace API {
   };
 
   type getDeviceParams = {
-    id: number;
+    id: string;
   };
 
   type LoginDto = {
@@ -171,13 +175,37 @@ declare namespace API {
     phone: string;
   };
 
+  type ReservationAddDto = {
+    deviceId?: string;
+    reserveStart?: string;
+    reserveEnd?: string;
+    remarks?: string;
+  };
+
+  type ReservationVo = {
+    id?: string;
+    userId?: string;
+    userName?: string;
+    deviceId?: string;
+    deviceName?: string;
+    reserveStart?: string;
+    reserveEnd?: string;
+    status?: number;
+    statusDesc?: string;
+    remarks?: string;
+  };
+
+  type reserveDeviceParams = {
+    reservationAddDto: ReservationAddDto;
+  };
+
   type updateDeviceStatusParams = {
-    deviceId: number;
+    deviceId: string;
     status: number;
   };
 
   type UpdateDto = {
-    id: number;
+    id: string;
     username: string;
     email?: string;
     phone?: string;
@@ -186,7 +214,7 @@ declare namespace API {
   };
 
   type UserVo = {
-    id?: number;
+    id?: string;
     username?: string;
     email?: string;
     phone?: string;
@@ -195,11 +223,14 @@ declare namespace API {
     userRole?: number;
     userStatus?: number;
     age?: number;
-    createTime?: string;
-    updateTime?: string;
     token?: string;
     overdueTimes?: number;
     borrowedDeviceCount?: number;
+    reservedDeviceCount?: number;
+    maxBorrowedDeviceCount?: number;
+    maxOverdueTimes?: number;
+    maxReservedDeviceCount?: number;
+    level?: number;
     active?: boolean;
   };
 }

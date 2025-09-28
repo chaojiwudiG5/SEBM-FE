@@ -37,7 +37,7 @@ const routes = [
     {
         path: '/sebm/user',
         component: BasicLayout,
-        meta: { requiresAuth: true, role: 1 }, // 普通用户role为1
+        meta: { requiresAuth: true, role: 0 }, // 普通用户role为0
         children: [
             // 首页
             {
@@ -110,9 +110,15 @@ const routes = [
         path: '/:pathMatch(.*)*',
         redirect: (to: any) => {
             const userStore = useUserStore()
-            return userStore.userInfo?.userRole === 2
-                ? '/sebm/tasks'
-                : '/sebm/home'
+            if (userStore.userInfo?.userRole === 2) {
+                return '/sebm/mechanic/tasks'
+            } else if (userStore.userInfo?.userRole === 0) {
+                return '/sebm/user/home'
+            } else if (userStore.userInfo?.userRole === 1) {
+                return '/sebm/user/home' // 管理员暂时跳转到用户页面
+            } else {
+                return '/login'
+            }
         },
     },
 ]
@@ -136,12 +142,16 @@ router.beforeEach((to, from, next) => {
     }
 
     // 检查用户角色是否匹配路由要求的角色
-    if (to.meta.role && userStore.userInfo.userRole !== to.meta.role) {
+    if (userStore.userInfo.userRole !== to.meta.role) {
         showNotify({ type: 'danger', message: '非法路径' })
         return next(
             userStore.userInfo.userRole === 2
                 ? '/sebm/mechanic/tasks'
-                : '/sebm/user/home'
+                : userStore.userInfo.userRole === 0
+                ? '/sebm/user/home'
+                : userStore.userInfo.userRole === 1
+                ? '/sebm/user/home' // 管理员暂时跳转到用户页面
+                : '/login'
         )
     }
 

@@ -24,12 +24,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
 import { showNotify } from 'vant'
 import { QrcodeStream } from 'vue-qrcode-reader'
 
 const route = useRoute()
+const router = useRouter()
 
 const title = computed(() => (route.meta?.title as string) || 'SEBM')
 const showScan = ref(false)
@@ -37,9 +38,22 @@ const hasCameraPermission = ref(true)
 
 const onDetect = (result: any) => {
     showScan.value = false
-    showNotify({ type: 'success', message: `扫描结果: ${result[0].rawValue}` })
-    // 这里可以添加对扫描结果的处理逻辑
-    // 例如跳转到对应页面或执行其他操作
+    const deviceId = result[0].rawValue
+    console.log('Scanned device ID:', deviceId)
+    
+    // 验证设备ID是否为数字
+    if (!/^\d+$/.test(deviceId)) {
+        showNotify({ type: 'danger', message: 'Invalid device ID format' })
+        return
+    }
+    
+    showNotify({ type: 'success', message: `Device ID: ${deviceId}` })
+    
+    // 跳转到借用页面，传递设备ID
+    router.push({
+        name: 'Borrow',
+        query: { deviceId: deviceId }
+    })
 }
 
 const onInit = async (promise: Promise<any>) => {
@@ -48,7 +62,7 @@ const onInit = async (promise: Promise<any>) => {
         hasCameraPermission.value = true
     } catch (error) {
         hasCameraPermission.value = false
-        showNotify({ type: 'danger', message: '摄像头权限被拒绝' })
+        showNotify({ type: 'danger', message: 'Camera permission denied' })
     }
 }
 </script>

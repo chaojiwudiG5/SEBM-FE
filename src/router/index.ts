@@ -74,6 +74,13 @@ const routes = [
                 component: () => import('../views/sebm/MessageBoxPage.vue'),
                 meta: { title: 'MessageBox' },
             },
+            // 借用页
+            {
+                path: 'borrow',
+                name: 'Borrow',
+                component: () => import('../views/sebm/BorrowPage.vue'),
+                meta: { title: 'Borrow Device' },
+            },
         ],
     },
     // 技工布局

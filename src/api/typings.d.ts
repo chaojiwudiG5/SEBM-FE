@@ -5,6 +5,30 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseBorrowRecordVo = {
+    code?: number;
+    data?: BorrowRecordVo;
+    message?: string;
+  };
+
+  type BaseResponseDeviceVo = {
+    code?: number;
+    data?: DeviceVo;
+    message?: string;
+  };
+
+  type BaseResponseListBorrowRecordVo = {
+    code?: number;
+    data?: BorrowRecordVo[];
+    message?: string;
+  };
+
+  type BaseResponseListDeviceVo = {
+    code?: number;
+    data?: DeviceVo[];
+    message?: string;
+  };
+
   type BaseResponseLong = {
     code?: number;
     data?: number;
@@ -23,7 +47,91 @@ declare namespace API {
     message?: string;
   };
 
+  type BorrowRecordAddDto = {
+    userId: number;
+    deviceId: number;
+    borrowTime: string;
+    dueTime: string;
+    remarks?: string;
+  };
+
+  type BorrowRecordQueryDto = {
+    pageNumber: number;
+    pageSize: number;
+    userId: number;
+  };
+
+  type BorrowRecordQueryWithStatusDto = {
+    pageNumber: number;
+    pageSize: number;
+    userId: number;
+    status: number;
+  };
+
+  type BorrowRecordReturnDto = {
+    id: number;
+    userId: number;
+    returnTime?: string;
+    remarks?: string;
+  };
+
+  type BorrowRecordVo = {
+    id?: number;
+    userId?: number;
+    userName?: string;
+    deviceId?: number;
+    deviceName?: string;
+    image?: string;
+    borrowTime?: string;
+    dueTime?: string;
+    returnTime?: string;
+    status?: number;
+    remarks?: string;
+  };
+
   type DeleteDto = {
+    id: number;
+  };
+
+  type DeviceAddDto = {
+    deviceName: string;
+    deviceType: string;
+    status: number;
+    location: string;
+    description?: string;
+    image?: string;
+  };
+
+  type DeviceQueryDto = {
+    pageNumber: number;
+    pageSize: number;
+    deviceName?: string;
+    deviceType?: string;
+    status?: number;
+    location?: string;
+  };
+
+  type DeviceUpdateDto = {
+    id: number;
+    deviceName: string;
+    deviceType: string;
+    status: number;
+    location: string;
+    description?: string;
+    image?: string;
+  };
+
+  type DeviceVo = {
+    id?: number;
+    deviceName?: string;
+    deviceType?: string;
+    status?: number;
+    location?: string;
+    description?: string;
+    image?: string;
+  };
+
+  type getDeviceParams = {
     id: number;
   };
 
@@ -63,6 +171,11 @@ declare namespace API {
     phone: string;
   };
 
+  type updateDeviceStatusParams = {
+    deviceId: number;
+    status: number;
+  };
+
   type UpdateDto = {
     id: number;
     username: string;
@@ -85,6 +198,8 @@ declare namespace API {
     createTime?: string;
     updateTime?: string;
     token?: string;
+    overdueTimes?: number;
+    borrowedDeviceCount?: number;
     active?: boolean;
   };
 }

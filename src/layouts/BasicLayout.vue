@@ -20,10 +20,11 @@ import GlobalMenu from '../components/GlobalMenu.vue'
     min-height: 100vh;
 }
 .content {
-    margin-top: 60px;
-    margin-bottom: 60px;
+    margin-top: 45px;
+    margin-bottom: 45px;
     flex: 1;
     overflow: auto;
     min-width: 0;
+    background-color: white;
 }
 </style>

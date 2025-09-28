@@ -8,8 +8,8 @@ import { showNotify } from 'vant'
 
 // 创建 Axios 实例
 const myAxios = axios.create({
-    baseURL: 'https://sebm-production.up.railway.app', // 修改为你的后端地址
-    // baseURL: 'http://localhost:29578',
+    // baseURL: 'https://sebm-production.up.railway.app', // 修改为你的后端地址
+    baseURL: 'http://localhost:29578',
     timeout: 60000,
     // JWT 不需要 withCredentials
     // withCredentials: true,

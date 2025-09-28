@@ -113,7 +113,7 @@ const handleLogout = () => {
 const navigateToEdit = (field: string, value: any) => {
     if (field === 'status') return
     router.push({
-        path: '/sebm/userinfoedit',
+        path: '/sebm/user/userinfoedit',
         query: {
             field,
             value: value?.toString() || '',

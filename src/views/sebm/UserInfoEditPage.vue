@@ -74,7 +74,7 @@ const handleSubmit = async () => {
         if (!userStore.userInfo) return
 
         const updateData: API.UpdateDto = {
-            id: userStore.userInfo.id as number,
+            id: userStore.userInfo.id as string,
             username:
                 field.value === 'username'
                     ? editValue.value
@@ -102,7 +102,7 @@ const handleSubmit = async () => {
         showNotify({ type: 'success', message: 'Update successful' })
         // Replace navigation to force refresh
         router.replace({
-            path: '/sebm/userinfo',
+            path: '/sebm/user/userinfo',
             query: { refresh: 'true' }
         })
     } catch (error) {

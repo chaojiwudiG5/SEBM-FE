@@ -51,10 +51,12 @@ const onSubmit = async () => {
         // 确保ID字段是字符串类型，避免精度丢失
         const processedUserVo: API.UserVo = {
             ...userVo,
+            //@ts-ignore
             id: userVo.id ? String(userVo.id) : userVo.id,
+            //@ts-ignore
             userId: userVo.userId ? String(userVo.userId) : userVo.userId
         }
-        
+        //@ts-ignore
         userStore.setUserInfo(processedUserVo)
         
         // 根据用户角色跳转

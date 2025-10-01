@@ -138,7 +138,10 @@ const currentLocation = ref<{ latitude: number; longitude: number } | null>(null
 const locationStatus = ref('Location not detected')
 
 // 电子围栏配置 (示例坐标，实际应该从后端获取)
-const fenceCenter = { latitude: 1.278156, longitude: 103.787040 } // 北京天安门
+const fenceCenters = [
+    { latitude: 1.278156, longitude: 103.787040 }, // 第一个坐标点
+    { latitude: 1.292324, longitude: 103.776167 }  // 第二个坐标点
+]
 const fenceRadius = 100 // 100米半径
 
 // 表单数据
@@ -151,14 +154,16 @@ const formData = ref({
 const isInFence = computed(() => {
     if (!currentLocation.value) return false
     
-    const distance = calculateDistance(
-        currentLocation.value.latitude,
-        currentLocation.value.longitude,
-        fenceCenter.latitude,
-        fenceCenter.longitude
-    )
-    
-    return distance <= fenceRadius
+    // 检查当前位置是否在任何一个围栏范围内
+    return fenceCenters.some(center => {
+        const distance = calculateDistance(
+            currentLocation.value!.latitude,
+            currentLocation.value!.longitude,
+            center.latitude,
+            center.longitude
+        )
+        return distance <= fenceRadius
+    })
 })
 
 // 获取设备信息

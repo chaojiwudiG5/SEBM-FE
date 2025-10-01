@@ -5,10 +5,19 @@
  */
 import axios from 'axios'
 import { showNotify } from 'vant'
+// 根据环境自动选择后端地址
+const getBaseURL = () => {
+    // 开发环境
+    if (import.meta.env.DEV) {
+        return 'http://localhost:29578'
+    }
+    // 生产环境
+    return 'https://sebm-production.up.railway.app'
+}
+
 // 创建 Axios 实例
 const myAxios = axios.create({
-    // baseURL: 'https://sebm-production.up.railway.app', // 修改为你的后端地址
-    baseURL: 'http://localhost:29578',
+    baseURL: getBaseURL(),
     timeout: 60000,
 })
 

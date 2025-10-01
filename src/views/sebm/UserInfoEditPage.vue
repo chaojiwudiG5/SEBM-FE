@@ -74,7 +74,7 @@ const handleSubmit = async () => {
         if (!userStore.userInfo) return
 
         const updateData: API.UpdateDto = {
-            id: userStore.userInfo.id as string,
+            id: userStore.userInfo.id as number,
             username:
                 field.value === 'username'
                     ? editValue.value

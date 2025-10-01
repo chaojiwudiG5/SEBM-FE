@@ -10,7 +10,13 @@ import { defineStore } from 'pinia'
 import { getCurrentUser } from '../api/user'
 import { showNotify } from 'vant'
 //@ts-ignore
-export const useUserStore = defineStore('user', {
+export const useUserStore = defineStore<'user',{
+    userInfo: API.UserVo | null,
+},{},{
+    setUserInfo(user: API.UserVo): void
+    clearUserInfo(): void
+    loadFromServer(): Promise<void>
+}>('user', {
     state: () => ({
         userInfo: null as API.UserVo | null,
     }),
@@ -49,14 +55,8 @@ export const useUserStore = defineStore('user', {
             }
         },
     },
-
     persist: {
-        enabled: true, // 开启持久化
-        strategies: [
-            {
-                key: 'user', // 存储的 key
-                storage: localStorage, // 也可以使用 sessionStorage
-            },
-        ],
+        key: 'user',
+        storage: localStorage,
     },
 })

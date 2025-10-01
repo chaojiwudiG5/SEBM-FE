@@ -81,6 +81,13 @@ const routes = [
                 component: () => import('../views/sebm/BorrowPage.vue'),
                 meta: { title: 'Borrow Device' },
             },
+            // 归还页
+            {
+                path: 'return',
+                name: 'Return',
+                component: () => import('../views/sebm/ReturnPage.vue'),
+                meta: { title: 'Return Device' },
+            },
         ],
     },
     // 技工布局

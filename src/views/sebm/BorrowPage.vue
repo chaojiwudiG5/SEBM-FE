@@ -275,7 +275,7 @@ const handleSubmit = async () => {
         submitting.value = true
         
         const borrowData: API.BorrowRecordAddDto = {
-            deviceId: deviceId.value!,
+            deviceId: deviceId.value! as any,
             borrowTime: formData.value.borrowTime,
             dueTime: formData.value.dueTime,
             remarks: formData.value.remarks || undefined
@@ -287,11 +287,9 @@ const handleSubmit = async () => {
         
         if (response) {
             showNotify({ type: 'success', message: 'Borrow request submitted successfully!' })
+            userStore.loadFromServer();
             router.push('/sebm/user/device')
         }
-    } catch (error) {
-        console.error('Failed to submit borrow request:', error)
-        showNotify({ type: 'danger', message: 'Failed to submit borrow request' })
     } finally {
         submitting.value = false
     }
@@ -315,18 +313,18 @@ onMounted(async () => {
     deviceId.value = deviceIdParam
     await fetchDeviceInfo(deviceId.value)
     
-    // 设置日期范围：明天到七天后
+    // 设置日期范围：今天到七天后
     const now = new Date()
     const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) // 明天
     const weekLater = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7) // 7天后
     
-    minDate.value = tomorrow
+    minDate.value = now // 允许从今天开始借用
     maxDate.value = weekLater
     
-    // 设置默认借用日期为明天
-    borrowDate.value = tomorrow
-    formData.value.borrowDate = formatDateDisplay(tomorrow)
-    formData.value.borrowTime = createDateTimeWithCurrentTime(tomorrow)
+    // 设置默认借用日期为今天
+    borrowDate.value = now
+    formData.value.borrowDate = formatDateDisplay(now)
+    formData.value.borrowTime = createDateTimeWithCurrentTime(now)
     
     // 设置默认归还日期为3天后
     const defaultDueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3)

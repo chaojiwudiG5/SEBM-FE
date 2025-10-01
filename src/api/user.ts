@@ -37,7 +37,7 @@ export async function deactivateUser(
   body: API.DeleteDto,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseLong>("/user/deactivateUser", {
+  return request<API.BaseResponseBoolean>("/user/deactivateUser", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

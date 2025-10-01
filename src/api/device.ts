@@ -66,7 +66,7 @@ export async function updateDevice(
   body: API.DeviceUpdateDto,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseLong>("/device/updateDevice", {
+  return request<API.BaseResponseDeviceVo>("/device/updateDevice", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -53,10 +53,6 @@
                     <span class="label">Repairing:</span>
                     <span class="value repairing">{{ statusCounts[2] }}</span>
                 </div>
-                <div class="stats-item">
-                    <span class="label">Reserved:</span>
-                    <span class="value reserved">{{ statusCounts[3] }}</span>
-                </div>
             </div>
         </div>
 
@@ -188,8 +184,7 @@ const statusOptions = ref([
     { text: 'All Status', value: '' },
     { text: 'Available', value: '0' },
     { text: 'Borrowed', value: '1' },
-    { text: 'Repairing', value: '2' },
-    { text: 'Reserved', value: '3' }
+    { text: 'Repairing', value: '2' }
 ])
 
 // 位置选项（这里可以根据实际数据动态生成）
@@ -209,7 +204,7 @@ const locationOptions = ref([
 ])
 
 // 状态统计
-const statusCounts = ref([0, 0, 0, 0]) // [available, borrowed, repairing, reserved]
+const statusCounts = ref([0, 0, 0]) // [available, borrowed, repairing]
 
 // 计算统计比例
 const statsRate = computed(() => {
@@ -223,7 +218,6 @@ const getStatusText = (status?: number): string => {
         case 0: return 'Available'
         case 1: return 'Borrowed'
         case 2: return 'Repairing'
-        case 3: return 'Reserved'
         default: return 'Unknown'
     }
 }
@@ -411,7 +405,6 @@ onMounted(async () => {
 .value.available { color: #07c160; }
 .value.borrowed { color: #ff9500; }
 .value.repairing { color: #ee0a24; }
-.value.reserved { color: #1989fa; }
 
 /* 设备列表区域样式 */
 .device-list-section {

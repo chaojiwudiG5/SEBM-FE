@@ -28,6 +28,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
 import { showNotify } from 'vant'
 import { QrcodeStream } from 'vue-qrcode-reader'
+import { getDevice } from '../api/device'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,7 +37,7 @@ const title = computed(() => (route.meta?.title as string) || 'SEBM')
 const showScan = ref(false)
 const hasCameraPermission = ref(true)
 
-const onDetect = (result: any) => {
+const onDetect = async (result: any) => {
     showScan.value = false
     const deviceId = result[0].rawValue
     console.log('Scanned device ID:', deviceId)
@@ -47,13 +48,44 @@ const onDetect = (result: any) => {
         return
     }
     
-    showNotify({ type: 'success', message: `Device ID: ${deviceId}` })
-    
-    // 跳转到借用页面，传递设备ID
-    router.push({
-        name: 'Borrow',
-        query: { deviceId: deviceId }
-    })
+    try {
+        // 获取设备信息
+        const response = await getDevice({ id: parseInt(deviceId) })
+        console.log('Device info response:', response)
+        
+        if (response) {
+            const device = response as API.DeviceVo
+            console.log('Device status:', device?.status)
+            
+            // 根据设备状态进行跳转
+            switch (device?.status) {
+                case 0: // 可用状态
+                    showNotify({ type: 'success', message: `Device available: ${device?.deviceName}` })
+                    router.push({
+                        name: 'Borrow',
+                        query: { deviceId: deviceId }
+                    })
+                    break
+                case 1: // 借出状态
+                    showNotify({ type: 'success', message: `Device borrowed: ${device?.deviceName}` })
+                    router.push({
+                        name: 'Return',
+                        query: { deviceId: deviceId }
+                    })
+                    break
+                case 2: // 维修中状态
+                    showNotify({ type: 'warning', message: 'Device is under maintenance and cannot be borrowed' })
+                    break
+                default:
+                    showNotify({ type: 'danger', message: 'Unknown device status' })
+            }
+        } else {
+            showNotify({ type: 'danger', message: 'Device not found' })
+        }
+    } catch (error) {
+        console.error('Failed to get device info:', error)
+        showNotify({ type: 'danger', message: 'Failed to get device information' })
+    }
 }
 
 const onInit = async (promise: Promise<any>) => {

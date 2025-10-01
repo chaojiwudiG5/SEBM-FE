@@ -24,19 +24,6 @@
                     />
                     <div class="circle-label">Borrowed</div>
                 </div>
-                <div class="circle-item">
-                    <van-circle
-                        :rate="100"
-                        :speed="30"
-                        :text="`${reservedCount}/${MaxReservedCount}`"
-                        :current-rate="reservedRate"
-                        stroke-width="24"
-                        color="#ff6b35"
-                        layer-color="#f0f0f0"
-                        size="100"
-                    />
-                    <div class="circle-label">Reserved</div>
-                </div>
             </div>
             <div class="info-section">
                 <div class="info-title">Device Status Overview</div>
@@ -49,16 +36,6 @@
                         <div class="info-item">
                             <span class="label">Max Borrowed:</span>
                             <span class="value">{{ MaxBorrowedCount }}</span>
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-item">
-                            <span class="label">Current Reserved:</span>
-                            <span class="value-reserved">{{ reservedCount }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Max Reserved:</span>
-                            <span class="value-reserved">{{ MaxReservedCount }}</span>
                         </div>
                     </div>
                     <div class="info-row">
@@ -181,12 +158,10 @@ import { getBorrowRecordListWithStatus } from '../../api/borrow'
 
 const userStore = useUserStore()
 
-// 常量定义：用户最大借用数量和最大预约数量
+// 常量定义：用户最大借用数量
 const MaxBorrowedCount = ref(userStore.userInfo?.maxBorrowedDeviceCount || 3)
-const MaxReservedCount = ref(userStore.userInfo?.maxReservedDeviceCount || 2)
 const overdueCount = ref(userStore.userInfo?.overdueTimes || 0)
 const usingCount = ref(userStore.userInfo?.borrowedDeviceCount || 0)
-const reservedCount = ref(userStore.userInfo?.reservedDeviceCount || 0)
 
 // 借用记录数据
 const usingRecords = ref<API.BorrowRecordVo[]>([])
@@ -218,13 +193,6 @@ const pageSize = 5
 const borrowRate = computed(() => {
     const rate = Math.round((usingCount.value / MaxBorrowedCount.value) * 100)
     console.log('Borrow rate calculated:', rate, 'usingCount:', usingCount.value, 'MaxBorrowedCount:', MaxBorrowedCount.value)
-    return rate
-})
-
-// 计算预约比例（百分比）
-const reservedRate = computed(() => {
-    const rate = Math.round((reservedCount.value / MaxReservedCount.value) * 100)
-    console.log('Reserved rate calculated:', rate, 'reservedCount:', reservedCount.value, 'MaxReservedCount:', MaxReservedCount.value)
     return rate
 })
 
@@ -390,6 +358,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    align-items: center;
 }
 
 .circle-item {

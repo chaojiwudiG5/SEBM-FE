@@ -1,4 +1,9 @@
 declare namespace API {
+  type addMaintenanceTaskParams = {
+    userMaintenanceRecordId: number;
+    mechanicId: number;
+  };
+
   type BaseResponseBoolean = {
     code?: number;
     data?: boolean;
@@ -29,15 +34,57 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseListUserMaintenanceRecordVo = {
+    code?: number;
+    data?: UserMaintenanceRecordVo[];
+    message?: string;
+  };
+
   type BaseResponseLong = {
     code?: number;
     data?: number;
     message?: string;
   };
 
+  type BaseResponseMapStringString = {
+    code?: number;
+    data?: Record<string, any>;
+    message?: string;
+  };
+
+  type BaseResponseMechanicanMaintenanceRecordVo = {
+    code?: number;
+    data?: MechanicanMaintenanceRecordVo;
+    message?: string;
+  };
+
+  type BaseResponsePageMechanicanMaintenanceRecordVo = {
+    code?: number;
+    data?: PageMechanicanMaintenanceRecordVo;
+    message?: string;
+  };
+
+  type BaseResponsePageTemplateVo = {
+    code?: number;
+    data?: PageTemplateVo;
+    message?: string;
+  };
+
   type BaseResponsePageUserVo = {
     code?: number;
     data?: PageUserVo;
+    message?: string;
+  };
+
+  type BaseResponseTemplateVo = {
+    code?: number;
+    data?: TemplateVo;
+    message?: string;
+  };
+
+  type BaseResponseUserMaintenanceRecordVo = {
+    code?: number;
+    data?: UserMaintenanceRecordVo;
     message?: string;
   };
 
@@ -89,6 +136,19 @@ declare namespace API {
     remarks?: string;
   };
 
+  type CreateTemplateDto = {
+    templateTitle: string;
+    templateType: string;
+    notificationNode: number;
+    notificationMethod: number[];
+    relateTimeOffset?: number;
+    content: string;
+    notificationRole?: number;
+    notificationEvent?: number;
+    notificationType?: number;
+    templateDesc?: string;
+  };
+
   type DeleteDto = {
     id: number;
   };
@@ -135,9 +195,54 @@ declare namespace API {
     id: number;
   };
 
+  type getRecordDetail1Params = {
+    id: number;
+  };
+
+  type getTemplateDetailParams = {
+    templateId: number;
+  };
+
+  type getUploadUrlParams = {
+    filename: string;
+    contentType: string;
+  };
+
   type LoginDto = {
     username: string;
     password: string;
+  };
+
+  type MechanicanMaintenanceRecordVo = {
+    id?: number;
+    deviceId?: number;
+    userId?: number;
+    description?: string;
+    image?: string;
+    status?: number;
+    createTime?: string;
+    updateTime?: string;
+    userMaintenanceRecordId?: number;
+  };
+
+  type MechanicanQueryDto = {
+    pageNumber: number;
+    pageSize: number;
+    deviceId?: number;
+    status?: number;
+  };
+
+  type MechanicanUpdateDto = {
+    id: number;
+    status: number;
+    description?: string;
+    image?: string;
+    userMaintenanceRecordId: number;
+  };
+
+  type MechanicRecordQueryDto = {
+    deviceId: number;
+    status: number;
   };
 
   type OrderItem = {
@@ -148,6 +253,34 @@ declare namespace API {
   type PageDto = {
     pageNumber: number;
     pageSize: number;
+  };
+
+  type PageMechanicanMaintenanceRecordVo = {
+    records?: MechanicanMaintenanceRecordVo[];
+    total?: number;
+    size?: number;
+    current?: number;
+    orders?: OrderItem[];
+    optimizeCountSql?: PageMechanicanMaintenanceRecordVo;
+    searchCount?: PageMechanicanMaintenanceRecordVo;
+    optimizeJoinOfCountSql?: boolean;
+    maxLimit?: number;
+    countId?: string;
+    pages?: number;
+  };
+
+  type PageTemplateVo = {
+    records?: TemplateVo[];
+    total?: number;
+    size?: number;
+    current?: number;
+    orders?: OrderItem[];
+    optimizeCountSql?: PageTemplateVo;
+    searchCount?: PageTemplateVo;
+    optimizeJoinOfCountSql?: boolean;
+    maxLimit?: number;
+    countId?: string;
+    pages?: number;
   };
 
   type PageUserVo = {
@@ -171,6 +304,29 @@ declare namespace API {
     phone: string;
   };
 
+  type TemplateQueryDto = {
+    pageNumber: number;
+    pageSize: number;
+    templateTitle?: string;
+    notificationNode?: number;
+    notificationMethod?: number;
+    status?: string;
+    userId?: number;
+  };
+
+  type TemplateVo = {
+    id?: number;
+    templateTitle?: string;
+    templateType?: string;
+    templateDesc?: string;
+    notificationRole?: number;
+    notificationType?: number;
+    notificationEvent?: number;
+    content?: string;
+    status?: string;
+    createTime?: string;
+  };
+
   type updateDeviceStatusParams = {
     deviceId: number;
     status: number;
@@ -183,6 +339,29 @@ declare namespace API {
     phone?: string;
     gender: number;
     age?: number;
+  };
+
+  type UserCreateDto = {
+    borrowRecordId: number;
+    description: string;
+    image: string;
+  };
+
+  type UserMaintenanceRecordVo = {
+    id?: number;
+    deviceName?: string;
+    userId?: number;
+    description?: string;
+    image?: string;
+    status?: number;
+    createTime?: string;
+    updateTime?: string;
+  };
+
+  type UserQueryDto = {
+    pageNumber: number;
+    pageSize: number;
+    status?: number;
   };
 
   type UserVo = {

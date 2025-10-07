@@ -95,6 +95,52 @@
                     />
                 </van-cell-group>
 
+                <!-- 设备报修折叠面板 -->
+                <van-collapse v-model="needMaintenance" class="maintenance-collapse">
+                    <van-collapse-item title="Device Maintenance Report" name="maintenance" icon="warning">
+                        <van-form>
+                            <van-field
+                                v-model="maintenanceForm.description"
+                                name="maintenanceDescription"
+                                label="Issue Description"
+                                type="textarea"
+                                placeholder="Please describe the device issues you encountered"
+                                autosize
+                                maxlength="500"
+                                show-word-limit
+                                :rules="isMaintenanceSelected ? [{ required: true, message: 'Please describe the issue' }] : []"
+                            />
+                            <van-field
+                                name="maintenanceImage"
+                                label="Issue Image"
+                                placeholder="Upload image (optional)"
+                            >
+                                <template #input>
+                                    <van-uploader
+                                        v-model="fileList"
+                                        :after-read="handleFileUpload"
+                                        :before-delete="handleFileDelete"
+                                        :max-count="1"
+                                        :max-size="5 * 1024 * 1024"
+                                        accept="image/*"
+                                        :disabled="uploading"
+                                        upload-text="Upload Image"
+                                        class="maintenance-uploader"
+                                    />
+                                </template>
+                            </van-field>
+                            <van-button 
+                                type="default" 
+                                size="small" 
+                                @click="needMaintenance = []"
+                                class="cancel-maintenance-btn"
+                            >
+                                Cancel Maintenance Report
+                            </van-button>
+                        </van-form>
+                    </van-collapse-item>
+                </van-collapse>
+
                 <!-- 提交按钮 -->
                 <div class="submit-section">
                     <van-button
@@ -122,6 +168,8 @@ import { showNotify, showConfirmDialog } from 'vant'
 import { useUserStore } from '../../store/user'
 import { getDevice } from '../../api/device'
 import { getBorrowRecordListWithStatus, returnDevice } from '../../api/borrow'
+import { createMaintenanceRecord } from '../../api/userMaintenanceRecord'
+import { getUploadUrl } from '../../api/ossController'
 
 const route = useRoute()
 const router = useRouter()
@@ -149,6 +197,20 @@ const formData = ref({
     returnTime: '',
     remarks: ''
 })
+
+// 报修相关数据
+const needMaintenance = ref<string[]>([])
+const maintenanceForm = ref({
+    description: '',
+    fileUrl: ''
+})
+
+// 文件上传相关数据
+const fileList = ref<any[]>([])
+const uploading = ref(false)
+
+// 计算是否选择报修
+const isMaintenanceSelected = computed(() => needMaintenance.value.includes('maintenance'))
 
 // 计算属性
 const isInFence = computed(() => {
@@ -291,6 +353,108 @@ const formatDate = (dateString?: string) => {
     })
 }
 
+// 处理文件上传
+const handleFileUpload = async (file: any) => {
+    uploading.value = true
+    
+    try {
+        // 生成文件名
+        const timestamp = Date.now()
+        const fileExtension = file.file.name.split('.').pop() || 'jpg'
+        const filename = `${timestamp}-image.${fileExtension}`
+        console.log('filename', filename)
+        // 获取上传URL
+        const uploadUrlResponse : any = await getUploadUrl({
+            filename: filename,
+            contentType: file.file.type || 'image/jpeg'
+        })
+        console.log('uploadUrlResponse:', uploadUrlResponse)
+        console.log('uploadUrlResponse.data:', uploadUrlResponse.data)
+        console.log('uploadUrlResponse.data?.uploadUrl:', uploadUrlResponse.data?.uploadUrl)
+        console.log('uploadUrlResponse.data?.fileUrl:', uploadUrlResponse.data?.fileUrl)
+        
+        if (!uploadUrlResponse || !uploadUrlResponse.uploadUrl || !uploadUrlResponse.fileUrl) {
+            console.error('Missing upload URL or file URL:', {
+                hasResponse: !!uploadUrlResponse,
+                hasData: !!uploadUrlResponse,
+                hasUploadUrl: !!uploadUrlResponse?.uploadUrl,
+                hasFileUrl: !!uploadUrlResponse?.fileUrl
+            })
+            throw new Error('Failed to get upload URL')
+        }
+        
+        const { uploadUrl, fileUrl } = uploadUrlResponse
+        
+        console.log('uploadUrl:', uploadUrl)
+        console.log('fileUrl:', fileUrl)
+        console.log('file to upload:', file.file)
+        
+        // 上传文件到OSS
+        const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file.file,
+            headers: {
+                'Content-Type': file.file.type || 'image/jpeg'
+            },
+            mode: 'cors' // 明确指定CORS模式
+        })
+        
+        console.log('uploadResponse:', uploadResponse)
+        console.log('uploadResponse.ok:', uploadResponse.ok)
+        console.log('uploadResponse.status:', uploadResponse.status)
+        console.log('uploadResponse.statusText:', uploadResponse.statusText)
+        
+        if (!uploadResponse.ok) {
+            let errorText = ''
+            try {
+                errorText = await uploadResponse.text()
+            } catch (e) {
+                errorText = 'Unable to read error response'
+            }
+            console.error('Upload failed:', {
+                status: uploadResponse.status,
+                statusText: uploadResponse.statusText,
+                errorText: errorText,
+                url: uploadUrl
+            })
+            throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText} - ${errorText}`)
+        }
+        
+        // 保存文件URL
+        maintenanceForm.value.fileUrl = fileUrl
+        
+        // 更新文件列表显示
+        fileList.value = [{
+            url: fileUrl,
+            name: file.file.name,
+            status: 'done'
+        }]
+        
+        showNotify({ type: 'success', message: 'Image uploaded successfully' })
+        
+    } catch (error) {
+        console.error('Upload error:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+        showNotify({ 
+            type: 'danger', 
+            message: `Failed to upload image: ${errorMessage}`,
+            duration: 5000 // 显示更长时间以便用户阅读
+        })
+        fileList.value = []
+    } finally {
+        uploading.value = false
+    }
+    
+    // 阻止默认上传行为
+    return false
+}
+
+// 删除文件
+const handleFileDelete = () => {
+    fileList.value = []
+    maintenanceForm.value.fileUrl = ''
+}
+
 // 获取设备状态标签类型
 const getStatusTagType = (status?: number) => {
     switch (status) {
@@ -328,14 +492,25 @@ const handleSubmit = async () => {
         return
     }
     
+    // 如果选择报修但没有填写描述，提示用户
+    if (isMaintenanceSelected.value && !maintenanceForm.value.description.trim()) {
+        showNotify({ type: 'warning', message: 'Please describe the device issue for maintenance report' })
+        return
+    }
+    
     try {
+        const confirmMessage = isMaintenanceSelected.value 
+            ? `Are you sure you want to return ${deviceInfo.value?.deviceName} and submit a maintenance report?`
+            : `Are you sure you want to return ${deviceInfo.value?.deviceName}?`
+            
         await showConfirmDialog({
             title: 'Confirm Return',
-            message: `Are you sure you want to return ${deviceInfo.value?.deviceName}?`,
+            message: confirmMessage,
         })
         
         submitting.value = true
         
+        // 归还设备
         const returnData: API.BorrowRecordReturnDto = {
             id: borrowRecord.value.id!,
             latitude: currentLocation.value.latitude.toString(),
@@ -344,15 +519,35 @@ const handleSubmit = async () => {
             remarks: formData.value.remarks
         }
         
-        const response = await returnDevice(returnData)
+        const returnResponse = await returnDevice(returnData)
         
-        if (response) {
-            showNotify({ type: 'success', message: 'Device returned successfully' })
-            await userStore.loadFromServer();
-            router.push({ name: 'Home' })
-        } else {
+        if (!returnResponse) {
             showNotify({ type: 'danger', message: 'Failed to return device' })
+            return
         }
+        
+        // 如果需要报修，则调用报修接口
+        if (isMaintenanceSelected.value && maintenanceForm.value.description.trim()) {
+            try {
+                const maintenanceData: API.UserCreateDto = {
+                    borrowRecordId: borrowRecord.value?.id!,
+                    description: maintenanceForm.value.description,
+                    image: maintenanceForm.value.fileUrl || ''
+                }
+                
+                await createMaintenanceRecord(maintenanceData)
+                showNotify({ type: 'success', message: 'Device returned and maintenance report submitted successfully' })
+            } catch (maintenanceError) {
+                console.error('Failed to submit maintenance report:', maintenanceError)
+                showNotify({ type: 'warning', message: 'Device returned successfully, but maintenance report submission failed' })
+            }
+        } else {
+            showNotify({ type: 'success', message: 'Device returned successfully' })
+        }
+        
+        await userStore.loadFromServer();
+        router.push({ name: 'Home' })
+        
     } finally {
         submitting.value = false
     }
@@ -468,6 +663,31 @@ onMounted(async () => {
 .submit-btn {
     font-size: 16px;
     font-weight: 600;
+}
+
+.maintenance-collapse {
+    margin: 12px 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.cancel-maintenance-btn {
+    margin: 12px 0;
+    width: 100%;
+}
+
+.maintenance-uploader {
+    width: 100%;
+}
+
+:deep(.van-uploader__upload) {
+    border-radius: 6px;
+    border: 1px dashed #dcdee0;
+}
+
+:deep(.van-uploader__preview-image) {
+    border-radius: 6px;
 }
 
 /* 覆盖Vant样式 */

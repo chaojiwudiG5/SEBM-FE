@@ -29,13 +29,18 @@ import { computed, ref } from 'vue'
 import { showNotify } from 'vant'
 import { QrcodeStream } from 'vue-qrcode-reader'
 import { getDevice } from '../api/device'
+import { useUserStore } from '../store/user'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const title = computed(() => (route.meta?.title as string) || 'SEBM')
 const showScan = ref(false)
 const hasCameraPermission = ref(true)
+
+// 判断当前用户是否为技工 (userRole为2表示技工)
+const isMechanic = computed(() => userStore.userInfo?.userRole === 2)
 
 const onDetect = async (result: any) => {
     showScan.value = false
@@ -57,27 +62,49 @@ const onDetect = async (result: any) => {
             const device = response as API.DeviceVo
             console.log('Device status:', device?.status)
             
-            // 根据设备状态进行跳转
-            switch (device?.status) {
-                case 0: // 可用状态
-                    showNotify({ type: 'success', message: `Device available: ${device?.deviceName}` })
-                    router.push({
-                        name: 'Borrow',
-                        query: { deviceId: deviceId }
-                    })
-                    break
-                case 1: // 借出状态
-                    showNotify({ type: 'success', message: `Device borrowed: ${device?.deviceName}` })
-                    router.push({
-                        name: 'Return',
-                        query: { deviceId: deviceId }
-                    })
-                    break
-                case 2: // 维修中状态
-                    showNotify({ type: 'warning', message: 'Device is under maintenance and cannot be borrowed' })
-                    break
-                default:
-                    showNotify({ type: 'danger', message: 'Unknown device status' })
+            // 根据用户角色和设备状态进行跳转
+            if (isMechanic.value) {
+                // 技工扫码逻辑
+                switch (device?.status) {
+                    case 2: // 维修中状态
+                        showNotify({ type: 'success', message: `Device under maintenance: ${device?.deviceName}` })
+                        router.push({
+                            name: 'MaintenanceComplete',
+                            query: { deviceId: deviceId }
+                        })
+                        break
+                    case 0: // 可用状态
+                        showNotify({ type: 'warning', message: 'Device is available, no maintenance needed' })
+                        break
+                    case 1: // 借出状态
+                        showNotify({ type: 'warning', message: 'Device is borrowed, not under maintenance' })
+                        break
+                    default:
+                        showNotify({ type: 'danger', message: 'Unknown device status' })
+                }
+            } else {
+                // 普通用户扫码逻辑
+                switch (device?.status) {
+                    case 0: // 可用状态
+                        showNotify({ type: 'success', message: `Device available: ${device?.deviceName}` })
+                        router.push({
+                            name: 'Borrow',
+                            query: { deviceId: deviceId }
+                        })
+                        break
+                    case 1: // 借出状态
+                        showNotify({ type: 'success', message: `Device borrowed: ${device?.deviceName}` })
+                        router.push({
+                            name: 'Return',
+                            query: { deviceId: deviceId }
+                        })
+                        break
+                    case 2: // 维修中状态
+                        showNotify({ type: 'warning', message: 'Device is under maintenance and cannot be borrowed' })
+                        break
+                    default:
+                        showNotify({ type: 'danger', message: 'Unknown device status' })
+                }
             }
         } else {
             showNotify({ type: 'danger', message: 'Device not found' })

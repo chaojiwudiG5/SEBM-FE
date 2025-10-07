@@ -110,6 +110,13 @@ const routes = [
                 component: () => import('../views/sebm/UserInfoPage.vue'),
                 meta: { title: 'UserInfo' },
             },
+            // 维修完成页
+            {
+                path: 'maintenance-complete',
+                name: 'MaintenanceComplete',
+                component: () => import('../views/sebm/MaintenanceCompletePage.vue'),
+                meta: { title: 'Maintenance Complete' },
+            },
         ],
     },
     // 404处理

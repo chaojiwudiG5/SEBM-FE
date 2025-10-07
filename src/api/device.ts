@@ -82,7 +82,7 @@ export async function updateDeviceStatus(
   params: API.updateDeviceStatusParams,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseBoolean>("/device/updateDeviceStatus", {
+  return request<API.BaseResponseDeviceVo>("/device/updateDeviceStatus", {
     method: "POST",
     params: {
       ...params,

@@ -148,6 +148,51 @@
             </van-collapse-item>
         </van-collapse>
 
+        <!-- 维修报单列表 -->
+        <!-- 骨架屏 -->
+        <div v-if="maintenanceLoading" class="skeleton-container">
+            <div v-for="n in 3" :key="n" class="skeleton-card">
+                <div class="skeleton-thumb"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-desc"></div>
+                    <div class="skeleton-footer">
+                        <div class="skeleton-tag"></div>
+                        <div class="skeleton-time"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <van-collapse v-else v-model="activeCollapse" class="device-collapse">
+            <van-collapse-item title="Maintenance Reports" name="maintenance" :disabled="maintenanceRecords.length === 0">
+                <template #title>
+                    <span>Maintenance Reports</span>
+                    <van-tag type="warning" style="margin-left: 8px;">{{ maintenanceRecords.length }}</van-tag>
+                </template>
+                <van-empty v-if="maintenanceRecords.length === 0" description="No maintenance reports" />
+                <div v-else>
+                    <van-card
+                        v-for="record in maintenanceRecords"
+                        :key="record.id"
+                        :title="record.deviceName || 'Unknown Device'"
+                        :desc="record.description || 'No description'"
+                        :thumb="record.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
+                        class="device-card maintenance-card"
+                    >
+                        <template #footer>
+                            <van-tag :type="getMaintenanceStatusType(record.status) as any">
+                                {{ getMaintenanceStatusText(record.status) }}
+                            </van-tag><br>
+                            <van-tag type="default">Created: {{ formatDate(record.createTime) }}</van-tag><br>
+                            <van-tag v-if="record.updateTime" type="default">
+                                Updated: {{ formatDate(record.updateTime) }}
+                            </van-tag>
+                        </template>
+                    </van-card>
+                </div>
+            </van-collapse-item>
+        </van-collapse>
+
     </div>
 </template>
 
@@ -155,6 +200,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useUserStore } from '../../store/user'
 import { getBorrowRecordListWithStatus } from '../../api/borrow'
+import { listMyRecords } from '../../api/userMaintenanceRecord'
 
 const userStore = useUserStore()
 
@@ -169,6 +215,10 @@ const returnedRecords = ref<API.BorrowRecordVo[]>([])
 const usingLoading = ref(false)
 const returnedLoading = ref(false)
 
+// 维修报单数据
+const maintenanceRecords = ref<API.UserMaintenanceRecordVo[]>([])
+const maintenanceLoading = ref(false)
+
 // 折叠面板控制 - 根据数据动态设置
 const activeCollapse = ref<string[]>([])
 
@@ -180,6 +230,9 @@ const updateActiveCollapse = () => {
     }
     if (returnedRecords.value.length > 0) {
         active.push('returned')
+    }
+    if (maintenanceRecords.value.length > 0) {
+        active.push('maintenance')
     }
     activeCollapse.value = active
 }
@@ -210,6 +263,24 @@ const formatDate = (dateString?: string) => {
         minute: '2-digit',
         timeZone: 'UTC' // 保持UTC时间，不进行本地时区转换
     })
+}
+
+// 获取维修状态文本
+const getMaintenanceStatusText = (status?: number) => {
+    switch (status) {
+        case 0: return 'In Progress'
+        case 1: return 'Completed'
+        default: return 'Unknown'
+    }
+}
+
+// 获取维修状态标签类型
+const getMaintenanceStatusType = (status?: number) => {
+    switch (status) {
+        case 0: return 'warning'
+        case 1: return 'success'
+        default: return 'default'
+    }
 }
 
 // 获取待归还设备列表
@@ -299,6 +370,42 @@ const fetchReturnedRecordsTotal = async () => {
     }
 }
 
+// 获取维修报单列表
+const fetchMaintenanceRecords = async () => {
+    if (!userStore.userInfo?.id) {
+        console.log('User ID is not available for maintenance records:', userStore.userInfo)
+        return
+    }
+    
+    maintenanceLoading.value = true
+    try {
+        console.log('Fetching maintenance records for user:', userStore.userInfo.id)
+        const response = await listMyRecords({
+            pageNumber: 1,
+            pageSize: 10,
+            status: undefined // 获取所有状态的维修记录
+        })
+        
+        console.log('Maintenance records response:', response)
+        
+        if (response && Array.isArray(response)) {
+            // 按创建时间降序排序
+            maintenanceRecords.value = response.sort((a: API.UserMaintenanceRecordVo, b: API.UserMaintenanceRecordVo) => {
+                if (!a.createTime || !b.createTime) return 0
+                return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
+            })
+            console.log('Maintenance records set:', maintenanceRecords.value)
+        } else {
+            console.log('API returned error or no data for maintenance records:', response)
+        }
+    } catch (error) {
+        console.error('Failed to get maintenance records:', error)
+    } finally {
+        maintenanceLoading.value = false
+        updateActiveCollapse() // 更新折叠面板状态
+    }
+}
+
 // 处理分页变化
 const handlePageChange = (page: number) => {
     currentPage.value = page
@@ -320,7 +427,8 @@ onMounted(async () => {
         await Promise.all([
             fetchUsingRecords(),
             fetchReturnedRecords(1), // 获取第一页数据
-            fetchReturnedRecordsTotal() // 获取总数
+            fetchReturnedRecordsTotal(), // 获取总数
+            fetchMaintenanceRecords() // 获取维修报单
         ])
     } else {
         console.log('Still no user info available')
@@ -381,6 +489,10 @@ onMounted(async () => {
 
 .device-card{
     background-color: white;
+}
+
+.maintenance-card {
+    border-left: 4px solid #ff9500;
 }
 
 /* /* 折叠面板样式 */

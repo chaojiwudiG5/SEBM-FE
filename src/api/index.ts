@@ -4,7 +4,6 @@
 // API 唯一标识：
 import * as userMaintenanceRecord from "./userMaintenanceRecord";
 import * as user from "./user";
-import * as tongzhimobanguanli from "./tongzhimobanguanli";
 import * as mechanicanMaintenanceRecord from "./mechanicanMaintenanceRecord";
 import * as device from "./device";
 import * as borrow from "./borrow";

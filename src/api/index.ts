@@ -11,7 +11,6 @@ import * as ossController from "./ossController";
 export default {
   userMaintenanceRecord,
   user,
-  tongzhimobanguanli,
   mechanicanMaintenanceRecord,
   device,
   borrow,

@@ -1,0 +1,370 @@
+/*
+ * @Description: WebSocket 工具类
+ * @version: v1.0.0
+ * @Author: GaoMingze
+ * @Date: 2025-01-27
+ */
+
+import { showNotify } from 'vant'
+import { NotificationType, NotificationPriority } from '../types/notification'
+
+// WebSocket 消息类型定义
+export interface WebSocketMessage {
+    type: NotificationType
+    title: string
+    content: string
+    timestamp: number
+    id: string
+    priority: NotificationPriority
+    read: boolean
+    data?: any
+}
+
+// WebSocket 连接状态
+export enum WebSocketStatus {
+    CONNECTING = 'connecting',
+    CONNECTED = 'connected',
+    DISCONNECTED = 'disconnected',
+    ERROR = 'error'
+}
+
+class WebSocketManager {
+    private ws: WebSocket | null = null
+    private url: string
+    private reconnectAttempts = 0
+    private maxReconnectAttempts = 5
+    private reconnectInterval = 3000
+    private heartbeatInterval: number | null = null
+    private status: WebSocketStatus = WebSocketStatus.DISCONNECTED
+    private messageHandlers: ((message: WebSocketMessage) => void)[] = []
+    private statusHandlers: ((status: WebSocketStatus) => void)[] = []
+
+    constructor() {
+        // 根据环境选择WebSocket URL
+        this.url = this.getWebSocketURL()
+    }
+
+    private getWebSocketURL(): string {
+        // 从用户store获取userId
+        const userStore = JSON.parse(localStorage.getItem('user') || '{}')
+        const userId = userStore.userInfo?.userId || userStore.userInfo?.id
+        
+        if (!userId) {
+            throw new Error('No user ID found')
+        }
+
+        // 根据环境选择WebSocket地址
+        // 后端 WebSocket 端点：/ws/notification（配置在 WebSocketConfig.java）
+        if (import.meta.env.DEV) {
+            // 开发环境 - 连接本地后端
+            return `ws://localhost:29578/ws/notification?userId=${userId}`
+        } else {
+            // 生产环境 - 使用 wss 安全连接
+            return `wss://sebm-production.up.railway.app/ws/notification?userId=${userId}`
+        }
+    }
+
+    // 连接WebSocket
+    public connect(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.ws = new WebSocket(this.url)
+                this.status = WebSocketStatus.CONNECTING
+
+                this.ws.onopen = () => {
+                    console.log('WebSocket connected')
+                    this.status = WebSocketStatus.CONNECTED
+                    this.reconnectAttempts = 0
+                    this.startHeartbeat()
+                    this.notifyStatusHandlers()
+                    resolve()
+                }
+
+                this.ws.onmessage = (event) => {
+                    try {
+                        const rawMessage = JSON.parse(event.data)
+                        
+                        // 适配后端消息格式
+                        const message: WebSocketMessage = this.adaptBackendMessage(rawMessage)
+                        this.handleMessage(message)
+                    } catch (error) {
+                        console.error('Failed to parse WebSocket message:', error)
+                    }
+                }
+
+                this.ws.onclose = (event) => {
+                    console.log('WebSocket disconnected:', event.code, event.reason)
+                    this.status = WebSocketStatus.DISCONNECTED
+                    this.stopHeartbeat()
+                    this.notifyStatusHandlers()
+                    
+                    // 如果不是主动关闭，尝试重连
+                    if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
+                        this.scheduleReconnect()
+                    }
+                }
+
+                this.ws.onerror = (error) => {
+                    console.error('WebSocket error:', error)
+                    this.status = WebSocketStatus.ERROR
+                    this.notifyStatusHandlers()
+                    reject(error)
+                }
+
+            } catch (error) {
+                console.error('Failed to create WebSocket connection:', error)
+                this.status = WebSocketStatus.ERROR
+                this.notifyStatusHandlers()
+                reject(error)
+            }
+        })
+    }
+
+    // 断开连接
+    public disconnect(): void {
+        if (this.ws) {
+            this.ws.close(1000, 'User disconnected')
+            this.ws = null
+        }
+        this.stopHeartbeat()
+        this.status = WebSocketStatus.DISCONNECTED
+        this.notifyStatusHandlers()
+    }
+
+    // 发送消息
+    public send(message: any): void {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message))
+        } else {
+            console.warn('WebSocket is not connected')
+        }
+    }
+
+    // 适配后端消息格式
+    private adaptBackendMessage(rawMessage: any): WebSocketMessage {
+        // 处理pong响应（心跳）
+        if (rawMessage.type === 'pong') {
+            console.log('Received pong from server')
+            // 返回一个空消息，不处理
+            return {
+                id: `pong_${Date.now()}`,
+                type: 'system' as any,
+                title: '',
+                content: '',
+                timestamp: rawMessage.timestamp || Date.now(),
+                priority: 'low' as any,
+                read: true,
+                data: rawMessage
+            }
+        }
+
+        // 适配后端的消息格式
+        return {
+            id: rawMessage.id || `msg_${Date.now()}`,
+            type: this.mapBackendType(rawMessage.type, rawMessage.notificationType),
+            title: rawMessage.subject || rawMessage.title || '新消息',
+            content: rawMessage.content || '',
+            timestamp: this.parseTimestamp(rawMessage.timestamp),
+            priority: this.inferPriority(rawMessage.notificationType, rawMessage.type),
+            read: false,
+            data: rawMessage
+        }
+    }
+
+    // 映射后端消息类型到前端类型
+    private mapBackendType(type: string, notificationType?: string): any {
+        // 如果是notification类型，根据notificationType细分
+        if (type === 'notification' && notificationType) {
+            const typeMap: { [key: string]: string } = {
+                'DEVICE_UPDATE': 'device_update',
+                'MAINTENANCE_UPDATE': 'maintenance_update',
+                'BORROW_UPDATE': 'borrow_update',
+                'USER_UPDATE': 'user_update',
+                'SECURITY_ALERT': 'security_alert',
+                'SYSTEM_MAINTENANCE': 'system_maintenance'
+            }
+            return typeMap[notificationType] || 'notification'
+        }
+        
+        // 直接类型映射
+        return type === 'system' ? 'system' : 'notification'
+    }
+
+    // 解析时间戳
+    private parseTimestamp(timestamp: any): number {
+        if (typeof timestamp === 'number') {
+            return timestamp
+        }
+        if (typeof timestamp === 'string') {
+            // 尝试解析日期字符串 "yyyy-MM-dd HH:mm:ss"
+            const date = new Date(timestamp.replace(' ', 'T'))
+            return date.getTime()
+        }
+        return Date.now()
+    }
+
+    // 根据通知类型推断优先级
+    private inferPriority(notificationType?: string, type?: string): any {
+        if (!notificationType) {
+            return type === 'system' ? 'normal' : 'normal'
+        }
+        
+        const highPriorityTypes = ['SECURITY_ALERT', 'SYSTEM_MAINTENANCE']
+        const urgentTypes = ['SECURITY_ALERT']
+        
+        if (urgentTypes.includes(notificationType)) {
+            return 'urgent'
+        }
+        if (highPriorityTypes.includes(notificationType)) {
+            return 'high'
+        }
+        return 'normal'
+    }
+
+    // 处理接收到的消息
+    private handleMessage(message: WebSocketMessage): void {
+        // 忽略pong消息和空标题消息
+        if (message.type === 'system' && !message.title) {
+            return
+        }
+
+        console.log('Received WebSocket message:', message)
+        
+        // 通知所有消息处理器
+        this.messageHandlers.forEach(handler => {
+            try {
+                handler(message)
+            } catch (error) {
+                console.error('Error in message handler:', error)
+            }
+        })
+
+        // 根据消息类型显示通知
+        this.showNotification(message)
+    }
+
+    // 显示通知
+    private showNotification(message: WebSocketMessage): void {
+        const notificationType = this.getNotificationType(message.priority)
+        
+        showNotify({
+            type: notificationType,
+            message: `${message.title}\n${message.content}`,
+            duration: this.getNotificationDuration(message.priority)
+        })
+    }
+
+    // 获取通知类型
+    private getNotificationType(priority: string): 'primary' | 'success' | 'warning' | 'danger' {
+        switch (priority) {
+            case 'urgent':
+                return 'danger'
+            case 'high':
+                return 'warning'
+            case 'normal':
+                return 'primary'
+            case 'low':
+                return 'success'
+            default:
+                return 'primary'
+        }
+    }
+
+    // 获取通知持续时间
+    private getNotificationDuration(priority: string): number {
+        switch (priority) {
+            case 'urgent':
+                return 0 // 不自动关闭
+            case 'high':
+                return 5000
+            case 'normal':
+                return 3000
+            case 'low':
+                return 2000
+            default:
+                return 3000
+        }
+    }
+
+    // 心跳检测
+    private startHeartbeat(): void {
+        this.heartbeatInterval = window.setInterval(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                this.send({ type: 'ping' })
+            }
+        }, 30000) // 每30秒发送一次心跳
+    }
+
+    private stopHeartbeat(): void {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval)
+            this.heartbeatInterval = null
+        }
+    }
+
+    // 重连机制
+    private scheduleReconnect(): void {
+        this.reconnectAttempts++
+        const delay = this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1)
+        
+        console.log(`Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`)
+        
+        setTimeout(() => {
+            if (this.status === WebSocketStatus.DISCONNECTED) {
+                this.connect().catch(error => {
+                    console.error('Reconnect failed:', error)
+                })
+            }
+        }, delay)
+    }
+
+    // 添加消息处理器
+    public onMessage(handler: (message: WebSocketMessage) => void): void {
+        this.messageHandlers.push(handler)
+    }
+
+    // 移除消息处理器
+    public offMessage(handler: (message: WebSocketMessage) => void): void {
+        const index = this.messageHandlers.indexOf(handler)
+        if (index > -1) {
+            this.messageHandlers.splice(index, 1)
+        }
+    }
+
+    // 添加状态变化处理器
+    public onStatusChange(handler: (status: WebSocketStatus) => void): void {
+        this.statusHandlers.push(handler)
+    }
+
+    // 移除状态变化处理器
+    public offStatusChange(handler: (status: WebSocketStatus) => void): void {
+        const index = this.statusHandlers.indexOf(handler)
+        if (index > -1) {
+            this.statusHandlers.splice(index, 1)
+        }
+    }
+
+    // 通知状态处理器
+    private notifyStatusHandlers(): void {
+        this.statusHandlers.forEach(handler => {
+            try {
+                handler(this.status)
+            } catch (error) {
+                console.error('Error in status handler:', error)
+            }
+        })
+    }
+
+    // 获取连接状态
+    public getStatus(): WebSocketStatus {
+        return this.status
+    }
+
+    // 检查是否已连接
+    public isConnected(): boolean {
+        return this.status === WebSocketStatus.CONNECTED
+    }
+}
+
+// 创建单例实例
+export const websocketManager = new WebSocketManager()

@@ -177,8 +177,8 @@ router.beforeEach((to, from, next) => {
     // 检查用户角色是否匹配路由要求的角色
     if (userStore.userInfo.userRole !== to.meta.role) {
         // 在开发环境下调试权限检查
-        if (import.meta.env.DEV) {
-            debugPermissionCheck(userStore.userInfo.userRole, to.meta.role)
+        if (import.meta.env.DEV && userStore.userInfo.userRole !== undefined) {
+            debugPermissionCheck(userStore.userInfo.userRole, to.meta.role as number)
         }
         
         // 使用store中的方法获取角色名称

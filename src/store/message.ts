@@ -84,7 +84,7 @@ export const useMessageStore = defineStore('message', {
         // 从后端分页加载消息列表（首次进入或下拉刷新时）
         async loadFromServer(pageNumber: number = 1, pageSize: number = 20, readStatus?: number) {
             const userStore = useUserStore()
-            const userId = userStore.userInfo?.userId || userStore.userInfo?.id
+            const userId = userStore.userInfo?.id
             if (!userId) return
 
             const query: API.NotificationRecordQueryDto = {
@@ -270,8 +270,7 @@ export const useMessageStore = defineStore('message', {
     // 持久化配置
     persist: {
         key: 'message-store',
-        storage: localStorage,
-        paths: ['messages', 'lastMessageTime'] // 只持久化消息和最后消息时间
+        storage: localStorage
     }
 })
 

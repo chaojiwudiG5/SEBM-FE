@@ -55,7 +55,7 @@
                     <!-- 按日期分组显示消息 -->
                     <div v-for="(messages, date) in groupedMessages" :key="date" class="date-group">
                         <div class="date-header">
-                            <van-divider>{{ formatDate(date) }}</van-divider>
+                            <van-divider>{{ formatDate(String(date)) }}</van-divider>
                         </div>
                         
                         <div v-for="message in messages" :key="message.id" class="message-item">
@@ -80,7 +80,6 @@
                                             <van-tag 
                                                 v-if="message.priority === 'urgent' || message.priority === 'high'"
                                                 :type="message.priority === 'urgent' ? 'danger' : 'warning'"
-                                                size="mini"
                                             >
                                                 {{ getPriorityText(message.priority) }}
                                             </van-tag>
@@ -247,15 +246,15 @@ const filteredMessages = computed(() => {
 
     // 根据 read/unread 过滤
     if (activeFilter.value === 'unread') {
-        messages = messages.filter(msg => !msg.read)
+        messages = messages.filter((msg: WebSocketMessage) => !msg.read)
     } else if (activeFilter.value === 'read') {
-        messages = messages.filter(msg => msg.read)
+        messages = messages.filter((msg: WebSocketMessage) => msg.read)
     }
 
     // 搜索过滤
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
-        messages = messages.filter(msg =>
+        messages = messages.filter((msg: WebSocketMessage) =>
             msg.title.toLowerCase().includes(query) ||
             msg.content.toLowerCase().includes(query)
         )
@@ -267,7 +266,7 @@ const filteredMessages = computed(() => {
 // 按日期分组的消息
 const groupedMessages = computed(() => {
     const groups: { [key: string]: WebSocketMessage[] } = {}
-    filteredMessages.value.forEach(msg => {
+    filteredMessages.value.forEach((msg: WebSocketMessage) => {
         const date = new Date(msg.timestamp).toDateString()
         if (!groups[date]) {
             groups[date] = []
@@ -327,8 +326,7 @@ const onMessageClick = (message: WebSocketMessage) => {
     // 显示消息详情
     showNotify({
         type: 'primary',
-        message: message.title,
-        description: message.content
+        message: `${message.title}\n${message.content}`
     })
 }
 
@@ -348,7 +346,7 @@ const markAsReadSingle = async (message: WebSocketMessage) => {
 
 const markAllAsRead = async () => {
     try {
-        const userId = userStore.userInfo?.userId || userStore.userInfo?.id
+        const userId = userStore.userInfo?.id
         if (!userId) {
             showNotify({ type: 'danger', message: '用户信息不存在' })
             return
@@ -369,7 +367,7 @@ const markAllAsRead = async () => {
 
 const clearReadMessages = async () => {
     try {
-        const userId = userStore.userInfo?.userId || userStore.userInfo?.id
+        const userId = userStore.userInfo?.id
         if (!userId) {
             showNotify({ type: 'danger', message: '用户信息不存在' })
             return
@@ -407,7 +405,7 @@ const removeMessage = async (messageId: string) => {
         })
         
         // 查找消息，获取后端 ID
-        const message = messageStore.allMessages.find(msg => msg.id === messageId)
+        const message = messageStore.allMessages.find((msg: WebSocketMessage) => msg.id === messageId)
         const backendId = message?.data?.id
         
         // 如果有后端 ID，调用后端删除接口

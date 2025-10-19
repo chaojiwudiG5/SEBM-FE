@@ -16,6 +16,8 @@ export const useUserStore = defineStore<'user',{
     setUserInfo(user: API.UserVo): void
     clearUserInfo(): void
     loadFromServer(): Promise<void>
+    validateUserRole(): boolean
+    getUserRoleName(): string
 }>('user', {
     state: () => ({
         userInfo: null as API.UserVo | null,
@@ -67,7 +69,7 @@ export const useUserStore = defineStore<'user',{
             }
             
             const validRoles = [0, 1, 2] // 0: 普通用户, 1: 管理员, 2: 技工
-            const isValid = validRoles.includes(this.userInfo.userRole)
+            const isValid = this.userInfo.userRole !== undefined && validRoles.includes(this.userInfo.userRole)
             
             if (!isValid) {
                 console.error('Invalid user role:', this.userInfo.userRole)
@@ -78,7 +80,7 @@ export const useUserStore = defineStore<'user',{
 
         // 获取用户角色名称
         getUserRoleName(): string {
-            if (!this.userInfo) return '未登录'
+            if (!this.userInfo || this.userInfo.userRole === undefined) return '未登录'
             
             const roleNames = { 0: '普通用户', 1: '管理员', 2: '技工' }
             return roleNames[this.userInfo.userRole as keyof typeof roleNames] || '未知角色'

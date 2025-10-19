@@ -47,7 +47,7 @@ class WebSocketManager {
     private getWebSocketURL(): string {
         // 从用户store获取userId
         const userStore = JSON.parse(localStorage.getItem('user') || '{}')
-        const userId = userStore.userInfo?.userId || userStore.userInfo?.id
+        const userId = userStore.userInfo?.id
         
         if (!userId) {
             throw new Error('No user ID found')

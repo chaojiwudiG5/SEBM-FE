@@ -71,6 +71,24 @@ export async function batchDeleteNotificationRecords(
   );
 }
 
+// 标记单条消息为已读 POST /notification/record/markAsRead
+export async function markAsRead(
+  body: { id: number | string },
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean>(
+    "/notification/record/markAsRead",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 // 批量标记消息为已读 POST /notification/record/batchMarkAsRead
 export async function batchMarkAsRead(
   body: { ids: (number | string)[] },
@@ -91,7 +109,7 @@ export async function batchMarkAsRead(
 
 // 标记用户所有未读消息为已读 POST /notification/record/markAllAsRead
 export async function markAllAsRead(
-  params: { userId: number | string },
+  params: { userId: number | string; userRole: number },
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseBoolean>(

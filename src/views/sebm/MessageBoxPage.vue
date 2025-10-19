@@ -173,7 +173,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useMessageStore } from '../../store/message'
 import { WebSocketMessage, WebSocketStatus as WsStatus } from '../../utils/websocket'
 import { showNotify, showConfirmDialog } from 'vant'
-import { deleteNotificationRecord, markAllAsRead as markAllAsReadApi, clearUserNotifications } from '../../api/notificationRecord'
+import { deleteNotificationRecord, markAllAsRead as markAllAsReadApi, clearUserNotifications, markAsRead as markAsReadApi } from '../../api/notificationRecord'
 import { useUserStore } from '../../store/user'
 
 const messageStore = useMessageStore()
@@ -317,10 +317,21 @@ const onLoad = () => {
     finished.value = true
 }
 
-const onMessageClick = (message: WebSocketMessage) => {
+const onMessageClick = async (message: WebSocketMessage) => {
     // 标记为已读
     if (!message.read) {
-        messageStore.markAsRead(message.id)
+        try {
+            // 获取后端消息 ID
+            const backendId = message.data?.id
+            if (backendId) {
+                // 调用后端 API 标记已读
+                await markAsReadApi({ id: backendId })
+            }
+            // 更新本地状态
+            messageStore.markAsRead(message.id)
+        } catch (error) {
+            console.error('Failed to mark message as read:', error)
+        }
     }
     
     // 显示消息详情
@@ -332,7 +343,14 @@ const onMessageClick = (message: WebSocketMessage) => {
 
 const markAsReadSingle = async (message: WebSocketMessage) => {
     try {
-        // 标记为已读
+        // 获取后端消息 ID
+        const backendId = message.data?.id
+        if (backendId) {
+            // 调用后端 API 标记已读
+            await markAsReadApi({ id: backendId })
+        }
+        
+        // 更新本地状态
         messageStore.markAsRead(message.id)
         showNotify({ type: 'success', message: '已标记为已读' })
         
@@ -353,7 +371,7 @@ const markAllAsRead = async () => {
         }
 
         // 标记所有未读消息为已读
-        await markAllAsReadApi({ userId: Number(userId) })
+        await markAllAsReadApi({ userId: Number(userId), userRole: 0 })
         messageStore.markAllAsRead()
         showNotify({ type: 'success', message: '已标记全部为已读' })
         
@@ -668,7 +686,6 @@ watch(isConnected, (connected) => {
 .message-list {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden;
 }
 
 .date-group {
@@ -704,7 +721,6 @@ watch(isConnected, (connected) => {
 
 .message-cell:active {
     background-color: #f7f8fa;
-    transform: scale(0.99);
 }
 
 .message-icon {

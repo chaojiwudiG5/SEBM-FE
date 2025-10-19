@@ -2,7 +2,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useMessageStore } from '../../store/message';
 import { WebSocketStatus as WsStatus } from '../../utils/websocket';
 import { showNotify, showConfirmDialog } from 'vant';
-import { deleteNotificationRecord, markAllAsRead as markAllAsReadApi, clearUserNotifications } from '../../api/notificationRecord';
+import { deleteNotificationRecord, markAllAsRead as markAllAsReadApi, clearUserNotifications, markAsRead as markAsReadApi } from '../../api/notificationRecord';
 import { useUserStore } from '../../store/user';
 const messageStore = useMessageStore();
 const userStore = useUserStore();
@@ -128,10 +128,22 @@ const onLoad = () => {
     loading.value = false;
     finished.value = true;
 };
-const onMessageClick = (message) => {
+const onMessageClick = async (message) => {
     // 标记为已读
     if (!message.read) {
-        messageStore.markAsRead(message.id);
+        try {
+            // 获取后端消息 ID
+            const backendId = message.data?.id;
+            if (backendId) {
+                // 调用后端 API 标记已读
+                await markAsReadApi({ id: backendId });
+            }
+            // 更新本地状态
+            messageStore.markAsRead(message.id);
+        }
+        catch (error) {
+            console.error('Failed to mark message as read:', error);
+        }
     }
     // 显示消息详情
     showNotify({
@@ -141,7 +153,13 @@ const onMessageClick = (message) => {
 };
 const markAsReadSingle = async (message) => {
     try {
-        // 标记为已读
+        // 获取后端消息 ID
+        const backendId = message.data?.id;
+        if (backendId) {
+            // 调用后端 API 标记已读
+            await markAsReadApi({ id: backendId });
+        }
+        // 更新本地状态
         messageStore.markAsRead(message.id);
         showNotify({ type: 'success', message: '已标记为已读' });
         // 重新加载数据
@@ -160,7 +178,7 @@ const markAllAsRead = async () => {
             return;
         }
         // 标记所有未读消息为已读
-        await markAllAsReadApi({ userId: Number(userId) });
+        await markAllAsReadApi({ userId: Number(userId), userRole: 0 });
         messageStore.markAllAsRead();
         showNotify({ type: 'success', message: '已标记全部为已读' });
         // 重新加载数据

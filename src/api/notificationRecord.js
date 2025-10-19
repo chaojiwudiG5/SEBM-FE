@@ -42,6 +42,17 @@ export async function batchDeleteNotificationRecords(body, options) {
         ...(options || {}),
     });
 }
+// 标记单条消息为已读 POST /notification/record/markAsRead
+export async function markAsRead(body, options) {
+    return request("/notification/record/markAsRead", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: body,
+        ...(options || {}),
+    });
+}
 // 批量标记消息为已读 POST /notification/record/batchMarkAsRead
 export async function batchMarkAsRead(body, options) {
     return request("/notification/record/batchMarkAsRead", {

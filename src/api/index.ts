@@ -3,6 +3,7 @@
 // API 更新时间：
 // API 唯一标识：
 import * as userMaintenanceRecord from "./userMaintenanceRecord";
+import * as notificationRecord from "./notificationRecord";
 import * as user from "./user";
 import * as mechanicanMaintenanceRecord from "./mechanicanMaintenanceRecord";
 import * as device from "./device";
@@ -15,4 +16,5 @@ export default {
   device,
   borrow,
   ossController,
+  notificationRecord,
 };

@@ -27,11 +27,13 @@ export const useUserStore = defineStore<'user',{
             if (user.token) {
                 localStorage.setItem('token', user.token)
             }
+            console.log('User info set:', user)
         },
 
         clearUserInfo() {
             this.userInfo = null
             localStorage.removeItem('token')
+            console.log('User info cleared')
         },
 
         async loadFromServer() {
@@ -49,10 +51,37 @@ export const useUserStore = defineStore<'user',{
                 if (this.userInfo.token) {
                     localStorage.setItem('token', this.userInfo.token)
                 }
+                console.log('User info loaded from server:', processedUserVo)
             } catch (err) {
                 this.userInfo = null
                 showNotify('获取用户信息失败')
+                console.error('Failed to load user info from server:', err)
             }
+        },
+
+        // 验证用户角色是否有效
+        validateUserRole(): boolean {
+            if (!this.userInfo) {
+                console.warn('No user info available for role validation')
+                return false
+            }
+            
+            const validRoles = [0, 1, 2] // 0: 普通用户, 1: 管理员, 2: 技工
+            const isValid = validRoles.includes(this.userInfo.userRole)
+            
+            if (!isValid) {
+                console.error('Invalid user role:', this.userInfo.userRole)
+            }
+            
+            return isValid
+        },
+
+        // 获取用户角色名称
+        getUserRoleName(): string {
+            if (!this.userInfo) return '未登录'
+            
+            const roleNames = { 0: '普通用户', 1: '管理员', 2: '技工' }
+            return roleNames[this.userInfo.userRole as keyof typeof roleNames] || '未知角色'
         },
     },
     persist: {

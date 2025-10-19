@@ -23,9 +23,14 @@
             <van-tabbar-item replace to="/sebm/user/device" icon="desktop-o"
                 >Device</van-tabbar-item
             >
-            <van-tabbar-item replace to="/sebm/user/messagebox" icon="chat-o"
-                >Message</van-tabbar-item
+            <van-tabbar-item 
+                replace 
+                to="/sebm/user/messagebox" 
+                icon="chat-o"
+                :badge="unreadCount > 0 ? unreadCount : undefined"
             >
+                Message
+            </van-tabbar-item>
             <van-tabbar-item replace to="/sebm/user/userinfo" icon="user-o"
                 >User</van-tabbar-item
             >
@@ -36,9 +41,13 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useUserStore } from '../store/user'
+import { useMessageStore } from '../store/message'
 
 const userStore = useUserStore()
+const messageStore = useMessageStore()
+
 const userRole = computed(() => userStore.userInfo?.userRole)
+const unreadCount = computed(() => messageStore.unreadCount)
 </script>
 
 <style scoped></style>

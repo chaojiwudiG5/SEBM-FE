@@ -9,7 +9,20 @@
 <template>
     <van-nav-bar :title="title" fixed>
         <template #right>
-            <van-icon name="scan" size="18" @click="showScan = true" />
+            <div class="header-right">
+                <!-- 消息图标（仅普通用户显示，且不在消息页面时显示） -->
+                <van-badge 
+                    v-if="!isMechanic && !isMessagePage" 
+                    :content="unreadCount > 0 ? unreadCount : ''" 
+                    :dot="unreadCount > 0"
+                    @click="goToMessages"
+                    class="message-badge"
+                >
+                    <van-icon name="chat-o" size="18" />
+                </van-badge>
+                <!-- 扫描图标 -->
+                <van-icon name="scan" size="18" @click="showScan = true" />
+            </div>
         </template>
     </van-nav-bar>
 
@@ -30,10 +43,12 @@ import { showNotify } from 'vant'
 import { QrcodeStream } from 'vue-qrcode-reader'
 import { getDevice } from '../api/device'
 import { useUserStore } from '../store/user'
+import { useMessageStore } from '../store/message'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const messageStore = useMessageStore()
 
 const title = computed(() => (route.meta?.title as string) || 'SEBM')
 const showScan = ref(false)
@@ -41,6 +56,17 @@ const hasCameraPermission = ref(true)
 
 // 判断当前用户是否为技工 (userRole为2表示技工)
 const isMechanic = computed(() => userStore.userInfo?.userRole === 2)
+
+// 判断是否在消息页面
+const isMessagePage = computed(() => route.name === 'MessageBox')
+
+// 未读消息数量
+const unreadCount = computed(() => messageStore.unreadCount)
+
+// 跳转到消息页面
+const goToMessages = () => {
+    router.push('/sebm/user/messagebox')
+}
 
 const onDetect = async (result: any) => {
     showScan.value = false
@@ -127,6 +153,22 @@ const onInit = async (promise: Promise<any>) => {
 </script>
 
 <style scoped>
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.message-badge {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.message-badge:active {
+    opacity: 0.7;
+}
+
 .scan-container {
     height: 100%;
     display: flex;

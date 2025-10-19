@@ -40,6 +40,15 @@ declare namespace API {
     message?: string;
   };
 
+  // 通用分页结构（补充）
+  type Page<T> = {
+    records?: T[];
+    total?: number;
+    size?: number;
+    current?: number;
+    pages?: number;
+  };
+
   type BaseResponseLong = {
     code?: number;
     data?: number;
@@ -253,6 +262,36 @@ declare namespace API {
   type PageDto = {
     pageNumber: number;
     pageSize: number;
+  };
+
+  // ===== Notification Record Types =====
+  // 查询 DTO（与后端 NotificationRecordQueryDto 字段对齐）
+  type NotificationRecordQueryDto = PageDto & {
+    userId?: number | string;
+    titleKeyword?: string;
+    queryRole?: number;
+    readStatus?: number;
+    startTime?: number;
+    endTime?: number;
+  };
+
+  // 返回 VO（与后端 NotificationRecordVo 对齐）
+  type NotificationRecordVo = {
+    id?: number | string;
+    userId?: number | string;
+    title?: string;
+    content?: string;
+    status?: number;
+    statusDesc?: string;
+    readStatus?: number;
+    sendTime?: string;
+    createTime?: string;
+  };
+
+  type BaseResponsePageNotificationRecordVo = {
+    code?: number;
+    data?: Page<NotificationRecordVo>;
+    message?: string;
   };
 
   type PageMechanicanMaintenanceRecordVo = {

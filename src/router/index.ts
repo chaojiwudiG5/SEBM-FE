@@ -11,6 +11,7 @@ import LoginLayout from '../layouts/LoginLayout.vue'
 import BasicLayout from '../layouts/BasicLayout.vue'
 import { useUserStore } from '../store/user'
 import { showNotify } from 'vant'
+import { debugUserState, debugRouteInfo, debugPermissionCheck } from '../utils/debug'
 
 const routes = [
     {
@@ -145,6 +146,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
 
+    // 在开发环境下启用调试
+    if (import.meta.env.DEV) {
+        debugRouteInfo(to, from)
+        debugUserState()
+    }
+
     // 不需要认证的路由直接放行
     if (!to.meta.requiresAuth) {
         return next()
@@ -152,12 +159,38 @@ router.beforeEach((to, from, next) => {
 
     // 检查用户是否登录
     if (!userStore.userInfo) {
+        console.log('User not logged in, redirecting to login')
+        return next('/login')
+    }
+
+    // 验证用户角色是否有效
+    if (!userStore.validateUserRole()) {
+        console.error('Invalid user role detected, redirecting to login')
+        showNotify({ 
+            type: 'danger', 
+            message: '用户角色信息异常，请重新登录' 
+        })
+        userStore.clearUserInfo()
         return next('/login')
     }
 
     // 检查用户角色是否匹配路由要求的角色
     if (userStore.userInfo.userRole !== to.meta.role) {
-        showNotify({ type: 'danger', message: '非法路径' })
+        // 在开发环境下调试权限检查
+        if (import.meta.env.DEV) {
+            debugPermissionCheck(userStore.userInfo.userRole, to.meta.role)
+        }
+        
+        // 使用store中的方法获取角色名称
+        const userRoleName = userStore.getUserRoleName()
+        const roleNames = { 0: '普通用户', 1: '管理员', 2: '技工' }
+        const requiredRoleName = roleNames[to.meta.role as keyof typeof roleNames] || '未知角色'
+        
+        showNotify({ 
+            type: 'danger', 
+            message: `权限不足：您当前是${userRoleName}，无法访问${requiredRoleName}页面` 
+        })
+        
         return next(
             userStore.userInfo.userRole === 2
                 ? '/sebm/mechanic/tasks'

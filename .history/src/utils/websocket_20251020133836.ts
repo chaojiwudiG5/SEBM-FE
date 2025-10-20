@@ -57,7 +57,7 @@ class WebSocketManager {
         // 后端 WebSocket 端点：/ws/notification（配置在 WebSocketConfig.java）
         if (import.meta.env.DEV) {
             // 开发环境 - 连接本地后端
-            return `ws://localhost:29578/ws/notification?userId=${userId}`
+            return `wss://sebm-production.up.railway.app/ws/notification?userId=${userId}`
         } else {
             // 生产环境 - 使用 wss 安全连接
             return `wss://sebm-production.up.railway.app/ws/notification?userId=${userId}`

@@ -25,7 +25,7 @@ export enum WebSocketStatus {
     CONNECTING = 'connecting',
     CONNECTED = 'connected',
     DISCONNECTED = 'disconnected',
-    ERROR = 'error',
+    ERROR = 'error'
 }
 
 class WebSocketManager {
@@ -48,7 +48,7 @@ class WebSocketManager {
         // 从用户store获取userId
         const userStore = JSON.parse(localStorage.getItem('user') || '{}')
         const userId = userStore.userInfo?.id
-
+        
         if (!userId) {
             throw new Error('No user ID found')
         }
@@ -83,34 +83,23 @@ class WebSocketManager {
                 this.ws.onmessage = (event) => {
                     try {
                         const rawMessage = JSON.parse(event.data)
-
+                        
                         // 适配后端消息格式
-                        const message: WebSocketMessage =
-                            this.adaptBackendMessage(rawMessage)
+                        const message: WebSocketMessage = this.adaptBackendMessage(rawMessage)
                         this.handleMessage(message)
                     } catch (error) {
-                        console.error(
-                            'Failed to parse WebSocket message:',
-                            error
-                        )
+                        console.error('Failed to parse WebSocket message:', error)
                     }
                 }
 
                 this.ws.onclose = (event) => {
-                    console.log(
-                        'WebSocket disconnected:',
-                        event.code,
-                        event.reason
-                    )
+                    console.log('WebSocket disconnected:', event.code, event.reason)
                     this.status = WebSocketStatus.DISCONNECTED
                     this.stopHeartbeat()
                     this.notifyStatusHandlers()
-
+                    
                     // 如果不是主动关闭，尝试重连
-                    if (
-                        event.code !== 1000 &&
-                        this.reconnectAttempts < this.maxReconnectAttempts
-                    ) {
+                    if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
                         this.scheduleReconnect()
                     }
                 }
@@ -121,6 +110,7 @@ class WebSocketManager {
                     this.notifyStatusHandlers()
                     reject(error)
                 }
+
             } catch (error) {
                 console.error('Failed to create WebSocket connection:', error)
                 this.status = WebSocketStatus.ERROR
@@ -164,26 +154,20 @@ class WebSocketManager {
                 timestamp: rawMessage.timestamp || Date.now(),
                 priority: 'low' as any,
                 read: true,
-                data: rawMessage,
+                data: rawMessage
             }
         }
 
         // 适配后端的消息格式
         return {
             id: rawMessage.id || `msg_${Date.now()}`,
-            type: this.mapBackendType(
-                rawMessage.type,
-                rawMessage.notificationType
-            ),
+            type: this.mapBackendType(rawMessage.type, rawMessage.notificationType),
             title: rawMessage.subject || rawMessage.title || '新消息',
             content: rawMessage.content || '',
             timestamp: this.parseTimestamp(rawMessage.timestamp),
-            priority: this.inferPriority(
-                rawMessage.notificationType,
-                rawMessage.type
-            ),
+            priority: this.inferPriority(rawMessage.notificationType, rawMessage.type),
             read: false,
-            data: rawMessage,
+            data: rawMessage
         }
     }
 
@@ -192,16 +176,16 @@ class WebSocketManager {
         // 如果是notification类型，根据notificationType细分
         if (type === 'notification' && notificationType) {
             const typeMap: { [key: string]: string } = {
-                DEVICE_UPDATE: 'device_update',
-                MAINTENANCE_UPDATE: 'maintenance_update',
-                BORROW_UPDATE: 'borrow_update',
-                USER_UPDATE: 'user_update',
-                SECURITY_ALERT: 'security_alert',
-                SYSTEM_MAINTENANCE: 'system_maintenance',
+                'DEVICE_UPDATE': 'device_update',
+                'MAINTENANCE_UPDATE': 'maintenance_update',
+                'BORROW_UPDATE': 'borrow_update',
+                'USER_UPDATE': 'user_update',
+                'SECURITY_ALERT': 'security_alert',
+                'SYSTEM_MAINTENANCE': 'system_maintenance'
             }
             return typeMap[notificationType] || 'notification'
         }
-
+        
         // 直接类型映射
         return type === 'system' ? 'system' : 'notification'
     }
@@ -224,10 +208,10 @@ class WebSocketManager {
         if (!notificationType) {
             return type === 'system' ? 'normal' : 'normal'
         }
-
+        
         const highPriorityTypes = ['SECURITY_ALERT', 'SYSTEM_MAINTENANCE']
         const urgentTypes = ['SECURITY_ALERT']
-
+        
         if (urgentTypes.includes(notificationType)) {
             return 'urgent'
         }
@@ -245,9 +229,9 @@ class WebSocketManager {
         }
 
         console.log('Received WebSocket message:', message)
-
+        
         // 通知所有消息处理器
-        this.messageHandlers.forEach((handler) => {
+        this.messageHandlers.forEach(handler => {
             try {
                 handler(message)
             } catch (error) {
@@ -262,18 +246,16 @@ class WebSocketManager {
     // 显示通知
     private showNotification(message: WebSocketMessage): void {
         const notificationType = this.getNotificationType(message.priority)
-
+        
         showNotify({
             type: notificationType,
             message: `${message.title}\n${message.content}`,
-            duration: this.getNotificationDuration(message.priority),
+            duration: this.getNotificationDuration(message.priority)
         })
     }
 
     // 获取通知类型
-    private getNotificationType(
-        priority: string
-    ): 'primary' | 'success' | 'warning' | 'danger' {
+    private getNotificationType(priority: string): 'primary' | 'success' | 'warning' | 'danger' {
         switch (priority) {
             case 'urgent':
                 return 'danger'
@@ -323,16 +305,13 @@ class WebSocketManager {
     // 重连机制
     private scheduleReconnect(): void {
         this.reconnectAttempts++
-        const delay =
-            this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1)
-
-        console.log(
-            `Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`
-        )
-
+        const delay = this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1)
+        
+        console.log(`Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`)
+        
         setTimeout(() => {
             if (this.status === WebSocketStatus.DISCONNECTED) {
-                this.connect().catch((error) => {
+                this.connect().catch(error => {
                     console.error('Reconnect failed:', error)
                 })
             }
@@ -367,7 +346,7 @@ class WebSocketManager {
 
     // 通知状态处理器
     private notifyStatusHandlers(): void {
-        this.statusHandlers.forEach((handler) => {
+        this.statusHandlers.forEach(handler => {
             try {
                 handler(this.status)
             } catch (error) {

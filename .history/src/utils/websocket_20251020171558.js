@@ -14,15 +14,15 @@ export var WebSocketStatus
     WebSocketStatus['ERROR'] = 'error'
 })(WebSocketStatus || (WebSocketStatus = {}))
 class WebSocketManager {
-    ws = null
-    url = null
-    reconnectAttempts = 0
-    maxReconnectAttempts = 5
-    reconnectInterval = 3000
-    heartbeatInterval = null
-    status = WebSocketStatus.DISCONNECTED
-    messageHandlers = []
-    statusHandlers = []
+    ws = null;
+    url = null;
+    reconnectAttempts = 0;
+    maxReconnectAttempts = 5;
+    reconnectInterval = 3000;
+    heartbeatInterval = null;
+    status = WebSocketStatus.DISCONNECTED;
+    messageHandlers = [];
+    statusHandlers = [];
     constructor() {
         // 延迟初始化 - 不在构造函数中获取 URL
     }
@@ -31,7 +31,11 @@ class WebSocketManager {
         const userStore = JSON.parse(localStorage.getItem('user') || '{}')
         const userId = userStore.userInfo?.id
         if (!userId) {
-            throw new Error('No user ID found. Please login first.')
+<<<<<<< HEAD
+            throw new Error('No user ID found')
+=======
+            throw new Error('No user ID found. Please login first.');
+>>>>>>> 357b5d5d8afac3af12935ca828c4dbb947640243
         }
         // 根据环境选择WebSocket地址
         // 后端 WebSocket 端点：/ws/notification（配置在 WebSocketConfig.java）
@@ -47,10 +51,15 @@ class WebSocketManager {
     connect() {
         return new Promise((resolve, reject) => {
             try {
-                // 延迟获取 URL - 只在真正连接时才获取用户 ID
-                this.url = this.getWebSocketURL()
+<<<<<<< HEAD
                 this.ws = new WebSocket(this.url)
                 this.status = WebSocketStatus.CONNECTING
+=======
+                // 延迟获取 URL - 只在真正连接时才获取用户 ID
+                this.url = this.getWebSocketURL();
+                this.ws = new WebSocket(this.url);
+                this.status = WebSocketStatus.CONNECTING;
+>>>>>>> 357b5d5d8afac3af12935ca828c4dbb947640243
                 this.ws.onopen = () => {
                     console.log('WebSocket connected')
                     this.status = WebSocketStatus.CONNECTED

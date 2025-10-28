@@ -124,9 +124,9 @@
                                         <div class="message-content">
                                             {{ message.content }}
                                         </div>
-                                        <!-- <div class="message-time">
+                                        <div class="message-time">
                                             {{ formatTime(message.timestamp) }}
-                                        </div> -->
+                                        </div>
                                     </template>
                                 </van-cell>
 
@@ -453,8 +453,6 @@ const clearReadMessages = async () => {
         await showConfirmDialog({
             title: 'Confirm Clear',
             message: 'Are you sure to clear all read messages?',
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
         })
 
         // 直接调用清空已读消息接口
@@ -480,8 +478,6 @@ const removeMessage = async (messageId: string) => {
         await showConfirmDialog({
             title: 'Confirm Delete',
             message: 'Are you sure to delete this message?',
-            confirmButtonText: 'Delete',
-            cancelButtonText: 'Cancel',
         })
 
         // 查找消息，获取后端 ID

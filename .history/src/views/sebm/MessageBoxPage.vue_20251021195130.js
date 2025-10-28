@@ -200,29 +200,29 @@ const clearReadMessages = async () => {
         }
         // 清空所有已读消息
         await showConfirmDialog({
-            title: 'Confirm Clear',
-            message: 'Are you sure to clear all read messages?',
+            title: '确认清空',
+            message: '确定要清空所有已读消息吗？',
         })
         // 直接调用清空已读消息接口
         await clearUserNotifications({ userId: Number(userId) })
         // 清空本地已读消息
         messageStore.clearReadMessages()
-        showNotify({ type: 'success', message: 'Cleared all read messages' })
+        showNotify({ type: 'success', message: '已清空已读消息' })
         // 重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
         await messageStore.loadFromServer(1, 20, readStatus)
     } catch (error) {
         // 用户取消或删除失败
         if (error) {
-            showNotify({ type: 'danger', message: 'Operation failed' })
+            showNotify({ type: 'danger', message: '操作失败' })
         }
     }
 }
 const removeMessage = async (messageId) => {
     try {
         await showConfirmDialog({
-            title: 'Confirm Delete',
-            message: 'Are you sure to delete this message?',
+            title: '确认删除',
+            message: '确定要删除这条消息吗？',
         })
         // 查找消息，获取后端 ID
         const message = messageStore.allMessages.find(
@@ -234,7 +234,8 @@ const removeMessage = async (messageId) => {
             await deleteNotificationRecord({ id: backendId })
         }
         // 从本地移除
-        showNotify({ type: 'success', message: 'Message deleted' })
+        messageStore.removeMessage(messageId)
+        showNotify({ type: 'success', message: '消息已删除' })
     } catch (error) {
         // 用户取消或删除失败
         if (error) {

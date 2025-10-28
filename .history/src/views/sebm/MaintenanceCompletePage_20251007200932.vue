@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-01-27 00:00:00
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-10-21 20:35:00
+ * @LastEditTime: 2025-01-27 00:00:00
 -->
 <template>
     <div class="maintenance-complete-page">
@@ -14,17 +14,11 @@
                 v-if="deviceInfo"
                 :title="deviceInfo.deviceName"
                 :desc="deviceInfo.description || 'No description'"
-                :thumb="
-                    deviceInfo.image ||
-                    'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'
-                "
+                :thumb="deviceInfo.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
                 class="device-card"
             >
                 <template #tags>
-                    <van-tag
-                        :type="getStatusTagType(deviceInfo.status) as any"
-                        class="status-tag"
-                    >
+                    <van-tag :type="getStatusTagType(deviceInfo.status) as any" class="status-tag">
                         {{ getStatusText(deviceInfo.status) }}
                     </van-tag>
                     <van-tag type="primary" plain class="type-tag">
@@ -35,7 +29,7 @@
                     </van-tag>
                 </template>
             </van-card>
-
+            
             <!-- 设备状态检查提示 -->
             <van-notice-bar
                 v-if="deviceInfo && deviceInfo.status !== 2"
@@ -52,10 +46,7 @@
                 <van-cell-group title="Maintenance Result" class="form-group">
                     <van-field name="maintenanceResult" label="Result">
                         <template #input>
-                            <van-radio-group
-                                v-model="formData.maintenanceResult"
-                                direction="horizontal"
-                            >
+                            <van-radio-group v-model="formData.maintenanceResult" direction="horizontal">
                                 <van-radio name="fixed">Fixed</van-radio>
                                 <van-radio name="scrapped">Scrapped</van-radio>
                             </van-radio-group>
@@ -74,12 +65,7 @@
                         autosize
                         maxlength="500"
                         show-word-limit
-                        :rules="[
-                            {
-                                required: true,
-                                message: 'Description is required',
-                            },
-                        ]"
+                        :rules="[{ required: true, message: 'Description is required' }]"
                     />
                 </van-cell-group>
 
@@ -132,10 +118,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { showNotify, showConfirmDialog } from 'vant'
 import { useUserStore } from '../../store/user'
 import { getDevice } from '../../api/device'
-import {
-    updateTaskStatus,
-    getRecordDetail,
-} from '../../api/mechanicanMaintenanceRecord'
+import { updateTaskStatus, getRecordDetail } from '../../api/mechanicanMaintenanceRecord'
 import { getUploadUrl } from '../../api/ossController'
 
 const route = useRoute()
@@ -151,7 +134,7 @@ const uploading = ref(false)
 // 表单数据
 const formData = ref({
     maintenanceResult: '',
-    description: '',
+    description: ''
 })
 
 // 文件上传相关数据
@@ -159,11 +142,9 @@ const fileList = ref<any[]>([])
 
 // 计算属性
 const canSubmit = computed(() => {
-    return (
-        deviceInfo.value?.status === 2 &&
-        formData.value.maintenanceResult &&
-        formData.value.description.trim()
-    )
+    return deviceInfo.value?.status === 2 && 
+           formData.value.maintenanceResult && 
+           formData.value.description.trim()
 })
 
 // 获取设备信息
@@ -178,10 +159,7 @@ const fetchDeviceInfo = async (deviceId: number) => {
         }
     } catch (error) {
         console.error('Failed to fetch device info:', error)
-        showNotify({
-            type: 'danger',
-            message: 'Failed to load device information',
-        })
+        showNotify({ type: 'danger', message: 'Failed to load device information' })
         router.back()
     }
 }
@@ -191,93 +169,81 @@ const fetchMaintenanceRecord = async (deviceId: number) => {
     try {
         const response: any = await getRecordDetail({
             deviceId: deviceId,
-            status: 1, // 获取状态为1（处理中）的记录
+            status: 1 // 获取状态为1（处理中）的记录
         })
-
+        
         console.log('Maintenance record detail response:', response)
-
+        
         if (response) {
             maintenanceRecord.value = response
             console.log('Found maintenance record:', response)
         } else {
-            showNotify({
-                type: 'warning',
-                message: 'No active maintenance record found for this device',
-            })
+            showNotify({ type: 'warning', message: 'No active maintenance record found for this device' })
         }
     } catch (error) {
         console.error('Failed to fetch maintenance record:', error)
-        showNotify({
-            type: 'danger',
-            message: 'Failed to load maintenance record',
-        })
+        showNotify({ type: 'danger', message: 'Failed to load maintenance record' })
     }
 }
 
 // 处理文件上传
 const handleFileUpload = async (file: any) => {
     uploading.value = true
-
+    
     try {
         // 生成文件名
         const timestamp = Date.now()
         const fileExtension = file.file.name.split('.').pop() || 'jpg'
         const filename = `${timestamp}-maintenance.${fileExtension}`
-
+        
         // 获取上传URL
         const uploadUrlResponse: any = await getUploadUrl({
             filename: filename,
-            contentType: file.file.type || 'image/jpeg',
+            contentType: file.file.type || 'image/jpeg'
         })
-
-        if (
-            !uploadUrlResponse ||
-            !uploadUrlResponse.uploadUrl ||
-            !uploadUrlResponse.fileUrl
-        ) {
+        
+        if (!uploadUrlResponse || !uploadUrlResponse.uploadUrl || !uploadUrlResponse.fileUrl) {
             throw new Error('Failed to get upload URL')
         }
-
+        
         const { uploadUrl, fileUrl } = uploadUrlResponse
-
+        
         // 上传文件到OSS
         const uploadResponse = await fetch(uploadUrl, {
             method: 'PUT',
             body: file.file,
             headers: {
-                'Content-Type': file.file.type || 'image/jpeg',
+                'Content-Type': file.file.type || 'image/jpeg'
             },
-            mode: 'cors',
+            mode: 'cors'
         })
-
+        
         if (!uploadResponse.ok) {
             throw new Error('Upload failed')
         }
-
+        
         // 更新文件列表显示
-        fileList.value = [
-            {
-                url: fileUrl,
-                name: file.file.name,
-                status: 'done',
-            },
-        ]
-
+        fileList.value = [{
+            url: fileUrl,
+            name: file.file.name,
+            status: 'done'
+        }]
+        
         showNotify({ type: 'success', message: 'Image uploaded successfully' })
+        
     } catch (error) {
         console.error('Upload error:', error)
-        const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error occurred'
-        showNotify({
-            type: 'danger',
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+        showNotify({ 
+            type: 'danger', 
             message: `Failed to upload image: ${errorMessage}`,
-            duration: 5000,
+            duration: 5000
         })
         fileList.value = []
     } finally {
         uploading.value = false
     }
-
+    
     return false
 }
 
@@ -289,28 +255,20 @@ const handleFileDelete = () => {
 // 获取设备状态标签类型
 const getStatusTagType = (status?: number) => {
     switch (status) {
-        case 0:
-            return 'success'
-        case 1:
-            return 'warning'
-        case 2:
-            return 'danger'
-        default:
-            return 'default'
+        case 0: return 'success'
+        case 1: return 'warning'
+        case 2: return 'danger'
+        default: return 'default'
     }
 }
 
 // 获取设备状态文本
 const getStatusText = (status?: number) => {
     switch (status) {
-        case 0:
-            return 'Available'
-        case 1:
-            return 'Borrowed'
-        case 2:
-            return 'Maintenance'
-        default:
-            return 'Unknown'
+        case 0: return 'Available'
+        case 1: return 'Borrowed'
+        case 2: return 'Maintenance'
+        default: return 'Unknown'
     }
 }
 
@@ -322,75 +280,55 @@ const getSubmitButtonText = () => {
         }
         return 'Please Fill All Fields'
     }
-    return `Mark as ${
-        formData.value.maintenanceResult === 'fixed' ? 'Fixed' : 'Scrapped'
-    }`
+    return `Mark as ${formData.value.maintenanceResult === 'fixed' ? 'Fixed' : 'Scrapped'}`
 }
 
 // 处理表单提交
 const handleSubmit = async () => {
     if (!canSubmit.value) {
         if (deviceInfo.value?.status !== 2) {
-            showNotify({
-                type: 'warning',
-                message: 'This device is not currently under maintenance',
-            })
+            showNotify({ type: 'warning', message: 'This device is not currently under maintenance' })
             return
         }
-        showNotify({
-            type: 'warning',
-            message: 'Please fill all required fields',
-        })
+        showNotify({ type: 'warning', message: 'Please fill all required fields' })
         return
     }
-
+    
     try {
-        const resultText =
-            formData.value.maintenanceResult === 'fixed' ? 'fixed' : 'scrapped'
+        const resultText = formData.value.maintenanceResult === 'fixed' ? 'fixed' : 'scrapped'
         const confirmMessage = `Are you sure you want to mark this device as ${resultText}?`
-
+        
         await showConfirmDialog({
             title: 'Confirm Maintenance',
             message: confirmMessage,
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
         })
-
+        
         submitting.value = true
-
+        
         // 检查是否有维修记录
         if (!maintenanceRecord.value) {
-            showNotify({
-                type: 'warning',
-                message: 'No active maintenance record found for this device',
-            })
+            showNotify({ type: 'warning', message: 'No active maintenance record found for this device' })
             return
         }
-
+        
         // 构建更新数据
         const updateData: API.MechanicanUpdateDto = {
             id: maintenanceRecord.value.id!,
             status: formData.value.maintenanceResult === 'fixed' ? 2 : 3, // 2: 修复成功, 3: 报废
             description: formData.value.description,
             image: fileList.value.length > 0 ? fileList.value[0].url : '',
-            userMaintenanceRecordId:
-                maintenanceRecord.value.userMaintenanceRecordId || 0,
+            userMaintenanceRecordId: maintenanceRecord.value.userMaintenanceRecordId || 0
         }
-
+        
         const response = await updateTaskStatus(updateData)
-
+        
         if (response) {
-            showNotify({
-                type: 'success',
-                message: `Device marked as ${resultText} successfully`,
-            })
+            showNotify({ type: 'success', message: `Device marked as ${resultText} successfully` })
             router.push({ name: 'Tasks' })
         } else {
-            showNotify({
-                type: 'danger',
-                message: 'Failed to update maintenance status',
-            })
+            showNotify({ type: 'danger', message: 'Failed to update maintenance status' })
         }
+        
     } finally {
         submitting.value = false
     }
@@ -404,10 +342,10 @@ onMounted(async () => {
         router.back()
         return
     }
-
+    
     await Promise.all([
         fetchDeviceInfo(Number(deviceId)),
-        fetchMaintenanceRecord(Number(deviceId)),
+        fetchMaintenanceRecord(Number(deviceId))
     ])
 })
 </script>

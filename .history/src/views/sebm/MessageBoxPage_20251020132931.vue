@@ -5,17 +5,17 @@
             <div v-show="showHeaderActions" class="page-header">
                 <div class="header-content">
                     <div class="header-actions">
-                        <van-button
-                            size="small"
-                            type="primary"
+                        <van-button 
+                            size="small" 
+                            type="primary" 
                             @click="markAllAsRead"
                             :disabled="unreadCount === 0"
                         >
                             Mark All Read
                         </van-button>
-                        <van-button
-                            size="small"
-                            type="default"
+                        <van-button 
+                            size="small" 
+                            type="default" 
                             @click="clearReadMessages"
                         >
                             Clear Read
@@ -53,118 +53,72 @@
                     @load="onLoad"
                 >
                     <!-- 按日期分组显示消息 -->
-                    <div
-                        v-for="(messages, date) in groupedMessages"
-                        :key="date"
-                        class="date-group"
-                    >
+                    <div v-for="(messages, date) in groupedMessages" :key="date" class="date-group">
                         <div class="date-header">
-                            <van-divider>{{
-                                formatDate(String(date))
-                            }}</van-divider>
+                            <van-divider>{{ formatDate(String(date)) }}</van-divider>
                         </div>
-
-                        <div
-                            v-for="message in messages"
-                            :key="message.id"
-                            class="message-item"
-                        >
+                        
+                        <div v-for="message in messages" :key="message.id" class="message-item">
                             <van-swipe-cell>
                                 <van-cell
-                                    :class="[
-                                        'message-cell',
-                                        { unread: !message.read },
-                                    ]"
+                                    :class="['message-cell', { 'unread': !message.read }]"
                                     @click="onMessageClick(message)"
                                 >
                                     <template #icon>
                                         <div class="message-icon">
-                                            <van-icon
-                                                :name="
-                                                    getMessageIcon(message.type)
-                                                "
-                                                :color="
-                                                    getMessageColor(
-                                                        message.priority
-                                                    )
-                                                "
+                                            <van-icon 
+                                                :name="getMessageIcon(message.type)" 
+                                                :color="getMessageColor(message.priority)"
                                                 size="20"
                                             />
                                         </div>
                                     </template>
-
+                                    
                                     <template #title>
                                         <div class="message-title">
-                                            <span class="title-text">{{
-                                                message.title
-                                            }}</span>
-                                            <van-tag
-                                                v-if="
-                                                    message.priority ===
-                                                        'urgent' ||
-                                                    message.priority === 'high'
-                                                "
-                                                :type="
-                                                    message.priority ===
-                                                    'urgent'
-                                                        ? 'danger'
-                                                        : 'warning'
-                                                "
+                                            <span class="title-text">{{ message.title }}</span>
+                                            <van-tag 
+                                                v-if="message.priority === 'urgent' || message.priority === 'high'"
+                                                :type="message.priority === 'urgent' ? 'danger' : 'warning'"
                                             >
-                                                {{
-                                                    getPriorityText(
-                                                        message.priority
-                                                    )
-                                                }}
+                                                {{ getPriorityText(message.priority) }}
                                             </van-tag>
                                         </div>
                                     </template>
-
+                                    
                                     <template #label>
-                                        <div class="message-content">
-                                            {{ message.content }}
-                                        </div>
-                                        <!-- <div class="message-time">
-                                            {{ formatTime(message.timestamp) }}
-                                        </div> -->
+                                        <div class="message-content">{{ message.content }}</div>
+                                        <div class="message-time">{{ formatTime(message.timestamp) }}</div>
                                     </template>
                                 </van-cell>
-
+                                
                                 <template #right>
                                     <div class="swipe-actions">
                                         <!-- Unread 栏：显示标记已读和删除按钮 -->
-                                        <template
-                                            v-if="activeFilter === 'unread'"
-                                        >
-                                            <van-button
-                                                square
-                                                type="primary"
-                                                text="Readed"
+                                        <template v-if="activeFilter === 'unread'">
+                                            <van-button 
+                                                square 
+                                                type="primary" 
+                                                text="标为已读"
                                                 class="swipe-button swipe-button-read"
-                                                @click="
-                                                    markAsReadSingle(message)
-                                                "
+                                                @click="markAsReadSingle(message)"
                                             />
-                                            <van-button
-                                                square
-                                                type="danger"
-                                                text="Delete"
+                                            <van-button 
+                                                square 
+                                                type="danger" 
+                                                text="删除"
                                                 class="swipe-button swipe-button-delete"
-                                                @click="
-                                                    removeMessage(message.id)
-                                                "
+                                                @click="removeMessage(message.id)"
                                             />
                                         </template>
                                         <!-- Read 栏：只显示删除按钮 -->
                                         <template v-else>
-                                            <van-button
-                                                square
-                                                type="danger"
-                                                text="Delete"
+                                            <van-button 
+                                                square 
+                                                type="danger" 
+                                                text="删除"
                                                 class="swipe-button swipe-button-delete"
-                                                @click="
-                                                    removeMessage(message.id)
-                                                "
+                                                @click="removeMessage(message.id)"
                                             />
                                         </template>
                                     </div>
@@ -172,9 +126,9 @@
                             </van-swipe-cell>
                         </div>
                     </div>
-
+                    
                     <!-- 空状态 -->
-                    <van-empty
+                    <van-empty 
                         v-if="!loading && filteredMessages.length === 0"
                         image="search"
                         description="No messages"
@@ -190,7 +144,7 @@
             @click="showTestMessageDialog = true"
             v-if="isDev"
         />
-
+        
         <!-- 测试消息对话框 -->
         <van-dialog
             v-model:show="showTestMessageDialog"
@@ -217,17 +171,9 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useMessageStore } from '../../store/message'
-import {
-    WebSocketMessage,
-    WebSocketStatus as WsStatus,
-} from '../../utils/websocket'
+import { WebSocketMessage, WebSocketStatus as WsStatus } from '../../utils/websocket'
 import { showNotify, showConfirmDialog } from 'vant'
-import {
-    deleteNotificationRecord,
-    markAllAsRead as markAllAsReadApi,
-    clearUserNotifications,
-    markAsRead as markAsReadApi,
-} from '../../api/notificationRecord'
+import { deleteNotificationRecord, markAllAsRead as markAllAsReadApi, clearUserNotifications, markAsRead as markAsReadApi } from '../../api/notificationRecord'
 import { useUserStore } from '../../store/user'
 
 const messageStore = useMessageStore()
@@ -308,10 +254,9 @@ const filteredMessages = computed(() => {
     // 搜索过滤
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
-        messages = messages.filter(
-            (msg: WebSocketMessage) =>
-                msg.title.toLowerCase().includes(query) ||
-                msg.content.toLowerCase().includes(query)
+        messages = messages.filter((msg: WebSocketMessage) =>
+            msg.title.toLowerCase().includes(query) ||
+            msg.content.toLowerCase().includes(query)
         )
     }
 
@@ -353,7 +298,7 @@ const onRefresh = async () => {
         // 根据当前选中的标签重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
         await messageStore.loadFromServer(1, 20, readStatus)
-
+        
         // 重新连接WebSocket（如果断开）
         if (!isConnected.value) {
             await messageStore.initWebSocket()
@@ -388,11 +333,11 @@ const onMessageClick = async (message: WebSocketMessage) => {
             console.error('Failed to mark message as read:', error)
         }
     }
-
+    
     // 显示消息详情
     showNotify({
         type: 'primary',
-        message: `${message.title}\n${message.content}`,
+        message: `${message.title}\n${message.content}`
     })
 }
 
@@ -404,19 +349,16 @@ const markAsReadSingle = async (message: WebSocketMessage) => {
             // 调用后端 API 标记已读
             await markAsReadApi({ id: backendId })
         }
-
+        
         // 更新本地状态
         messageStore.markAsRead(message.id)
-        showNotify({ type: 'success', message: 'Marked as readed' })
-
+        showNotify({ type: 'success', message: '已标记为已读' })
+        
         // 重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
         await messageStore.loadFromServer(1, 20, readStatus)
     } catch (error) {
-        showNotify({
-            type: 'danger',
-            message: 'Failed to mark message as read',
-        })
+        showNotify({ type: 'danger', message: '标记失败' })
     }
 }
 
@@ -432,7 +374,7 @@ const markAllAsRead = async () => {
         await markAllAsReadApi({ userId: Number(userId), userRole: 0 })
         messageStore.markAllAsRead()
         showNotify({ type: 'success', message: '已标记全部为已读' })
-
+        
         // 重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
         await messageStore.loadFromServer(1, 20, readStatus)
@@ -451,26 +393,24 @@ const clearReadMessages = async () => {
 
         // 清空所有已读消息
         await showConfirmDialog({
-            title: 'Confirm Clear',
-            message: 'Are you sure to clear all read messages?',
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
+            title: '确认清空',
+            message: '确定要清空所有已读消息吗？'
         })
-
+        
         // 直接调用清空已读消息接口
         await clearUserNotifications({ userId: Number(userId) })
-
+        
         // 清空本地已读消息
         messageStore.clearReadMessages()
-        showNotify({ type: 'success', message: 'Cleared all read messages' })
-
+        showNotify({ type: 'success', message: '已清空已读消息' })
+        
         // 重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
         await messageStore.loadFromServer(1, 20, readStatus)
     } catch (error) {
         // 用户取消或删除失败
         if (error) {
-            showNotify({ type: 'danger', message: 'Failed to clear messages' })
+            showNotify({ type: 'danger', message: '操作失败' })
         }
     }
 }
@@ -478,41 +418,34 @@ const clearReadMessages = async () => {
 const removeMessage = async (messageId: string) => {
     try {
         await showConfirmDialog({
-            title: 'Confirm Delete',
-            message: 'Are you sure to delete this message?',
-            confirmButtonText: 'Delete',
-            cancelButtonText: 'Cancel',
+            title: '确认删除',
+            message: '确定要删除这条消息吗？'
         })
-
+        
         // 查找消息，获取后端 ID
-        const message = messageStore.allMessages.find(
-            (msg: WebSocketMessage) => msg.id === messageId
-        )
+        const message = messageStore.allMessages.find((msg: WebSocketMessage) => msg.id === messageId)
         const backendId = message?.data?.id
-
+        
         // 如果有后端 ID，调用后端删除接口
         if (backendId) {
             await deleteNotificationRecord({ id: backendId })
         }
-
+        
         // 从本地移除
         messageStore.removeMessage(messageId)
-        showNotify({ type: 'success', message: 'Message deleted' })
+        showNotify({ type: 'success', message: '消息已删除' })
     } catch (error) {
         // 用户取消或删除失败
         if (error) {
-            showNotify({ type: 'danger', message: 'Failed to delete message' })
+            showNotify({ type: 'danger', message: '删除失败' })
         }
     }
 }
 
 const sendTestMessage = () => {
-    messageStore.sendTestMessage(
-        testMessageType.value,
-        testMessagePriority.value
-    )
+    messageStore.sendTestMessage(testMessageType.value, testMessagePriority.value)
     showTestMessageDialog.value = false
-    showNotify({ type: 'success', message: 'Test message sent' })
+    showNotify({ type: 'success', message: '测试消息已发送' })
 }
 
 // 工具方法
@@ -522,7 +455,7 @@ const getMessageIcon = (type: string) => {
         system: 'setting',
         device_update: 'desktop',
         maintenance_update: 'tool',
-        borrow_update: 'exchange',
+        borrow_update: 'exchange'
     }
     return icons[type] || 'bell'
 }
@@ -532,7 +465,7 @@ const getMessageColor = (priority: string) => {
         urgent: '#ee0a24',
         high: '#ff976a',
         normal: '#1989fa',
-        low: '#07c160',
+        low: '#07c160'
     }
     return colors[priority] || '#1989fa'
 }
@@ -542,7 +475,7 @@ const getPriorityText = (priority: string) => {
         urgent: '紧急',
         high: '重要',
         normal: '普通',
-        low: '低',
+        low: '低'
     }
     return texts[priority] || '普通'
 }
@@ -552,15 +485,15 @@ const formatDate = (dateString: string) => {
     const today = new Date()
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
-
+    
     if (date.toDateString() === today.toDateString()) {
-        return 'Today'
+        return '今天'
     } else if (date.toDateString() === yesterday.toDateString()) {
-        return 'Yesterday'
+        return '昨天'
     } else {
-        return date.toLocaleDateString('zh-CN', {
-            month: 'short',
-            day: 'numeric',
+        return date.toLocaleDateString('zh-CN', { 
+            month: 'short', 
+            day: 'numeric' 
         })
     }
 }
@@ -568,7 +501,7 @@ const formatDate = (dateString: string) => {
 const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString('zh-CN', {
         hour: '2-digit',
-        minute: '2-digit',
+        minute: '2-digit'
     })
 }
 
@@ -602,7 +535,7 @@ onMounted(async () => {
         await messageStore.loadFromServer(1, 20, 1)
         // 再初始化 WebSocket 实时推送
         await messageStore.initWebSocket()
-
+        
         // 通过 ref 添加滚动监听
         if (scrollContainer.value) {
             scrollContainer.value.addEventListener('scroll', handleScroll)
@@ -610,24 +543,17 @@ onMounted(async () => {
 
         // 使用 IntersectionObserver，当筛选区域离开视口时显示操作区
         if ('IntersectionObserver' in window && filterRef.value) {
-            filterObserver = new IntersectionObserver(
-                (entries) => {
-                    const entry = entries[0]
-                    // 当筛选区域不可见时，也显示头部按钮
-                    if (entry) {
-                        showHeaderActions.value =
-                            !entry.isIntersecting ||
-                            (scrollContainer.value
-                                ? scrollContainer.value.scrollTop > 50
-                                : window.scrollY > 50)
-                    }
-                },
-                {
-                    // 直接以视口为根，更稳健
-                    root: null,
-                    threshold: 1,
+            filterObserver = new IntersectionObserver((entries) => {
+                const entry = entries[0]
+                // 当筛选区域不可见时，也显示头部按钮
+                if (entry) {
+                    showHeaderActions.value = !entry.isIntersecting || (scrollContainer.value ? scrollContainer.value.scrollTop > 50 : window.scrollY > 50)
                 }
-            )
+            }, {
+                // 直接以视口为根，更稳健
+                root: null,
+                threshold: 1
+            })
             filterObserver.observe(filterRef.value)
         }
 
@@ -638,10 +564,10 @@ onMounted(async () => {
         updateHeaderVisibility()
     } catch (error) {
         console.error('Failed to initialize WebSocket:', error)
-        // showNotify({
-        //     type: 'warning',
-        //     message: 'WebSocket连接失败，消息可能无法实时更新',
-        // })
+        showNotify({ 
+            type: 'warning', 
+            message: 'WebSocket连接失败，消息可能无法实时更新' 
+        })
     }
 })
 
@@ -657,7 +583,7 @@ onUnmounted(() => {
         filterObserver.disconnect()
         filterObserver = null
     }
-
+    
     // 注意：这里不主动断开连接，因为其他页面可能也需要使用
     // messageStore.disconnectWebSocket()
 })

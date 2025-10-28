@@ -124,9 +124,9 @@
                                         <div class="message-content">
                                             {{ message.content }}
                                         </div>
-                                        <!-- <div class="message-time">
+                                        <div class="message-time">
                                             {{ formatTime(message.timestamp) }}
-                                        </div> -->
+                                        </div>
                                     </template>
                                 </van-cell>
 

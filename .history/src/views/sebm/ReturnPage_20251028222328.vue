@@ -239,7 +239,7 @@ const fenceCenters = [
     { latitude: 1.278156, longitude: 103.78704 }, // 第一个坐标点
     { latitude: 1.292324, longitude: 103.776167 }, // 第二个坐标点
 ]
-const fenceRadius = 10000000 // 1000米半径
+const fenceRadius = 100000000 // 1000米半径
 
 // 表单数据
 const formData = ref({

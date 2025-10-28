@@ -9,7 +9,7 @@ import { showNotify } from 'vant'
 const getBaseURL = () => {
     // 开发环境
     if (import.meta.env.DEV) {
-        return 'http://47.84.50.84:8090/api'
+        return 'http://47.245.121.171:8090'
     }
     // 生产环境
     return 'https://sebm-production.up.railway.app'

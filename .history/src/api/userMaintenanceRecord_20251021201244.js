@@ -1,11 +1,3 @@
-/*
- * @Description:
- * @version: v1.0.0
- * @Author: GaoMingze
- * @Date: 2025-10-20 13:29:32
- * @LastEditors: GaoMingze
- * @LastEditTime: 2025-10-21 20:12:45
- */
 // @ts-ignore
 /* eslint-disable */
 import request from '../axios/request'

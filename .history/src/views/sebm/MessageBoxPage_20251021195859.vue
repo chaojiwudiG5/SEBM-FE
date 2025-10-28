@@ -124,9 +124,9 @@
                                         <div class="message-content">
                                             {{ message.content }}
                                         </div>
-                                        <!-- <div class="message-time">
+                                        <div class="message-time">
                                             {{ formatTime(message.timestamp) }}
-                                        </div> -->
+                                        </div>
                                     </template>
                                 </van-cell>
 
@@ -407,16 +407,13 @@ const markAsReadSingle = async (message: WebSocketMessage) => {
 
         // 更新本地状态
         messageStore.markAsRead(message.id)
-        showNotify({ type: 'success', message: 'Marked as readed' })
+        showNotify({ type: 'success', message: '已标记为已读' })
 
         // 重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
         await messageStore.loadFromServer(1, 20, readStatus)
     } catch (error) {
-        showNotify({
-            type: 'danger',
-            message: 'Failed to mark message as read',
-        })
+        showNotify({ type: 'danger', message: '标记失败' })
     }
 }
 
@@ -451,10 +448,8 @@ const clearReadMessages = async () => {
 
         // 清空所有已读消息
         await showConfirmDialog({
-            title: 'Confirm Clear',
-            message: 'Are you sure to clear all read messages?',
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
+            title: '确认清空',
+            message: '确定要清空所有已读消息吗？',
         })
 
         // 直接调用清空已读消息接口
@@ -462,7 +457,7 @@ const clearReadMessages = async () => {
 
         // 清空本地已读消息
         messageStore.clearReadMessages()
-        showNotify({ type: 'success', message: 'Cleared all read messages' })
+        showNotify({ type: 'success', message: '已清空已读消息' })
 
         // 重新加载数据
         const readStatus = activeFilter.value === 'read' ? 1 : 0
@@ -470,7 +465,7 @@ const clearReadMessages = async () => {
     } catch (error) {
         // 用户取消或删除失败
         if (error) {
-            showNotify({ type: 'danger', message: 'Failed to clear messages' })
+            showNotify({ type: 'danger', message: '操作失败' })
         }
     }
 }
@@ -478,10 +473,8 @@ const clearReadMessages = async () => {
 const removeMessage = async (messageId: string) => {
     try {
         await showConfirmDialog({
-            title: 'Confirm Delete',
-            message: 'Are you sure to delete this message?',
-            confirmButtonText: 'Delete',
-            cancelButtonText: 'Cancel',
+            title: '确认删除',
+            message: '确定要删除这条消息吗？',
         })
 
         // 查找消息，获取后端 ID
@@ -497,11 +490,11 @@ const removeMessage = async (messageId: string) => {
 
         // 从本地移除
         messageStore.removeMessage(messageId)
-        showNotify({ type: 'success', message: 'Message deleted' })
+        showNotify({ type: 'success', message: '消息已删除' })
     } catch (error) {
         // 用户取消或删除失败
         if (error) {
-            showNotify({ type: 'danger', message: 'Failed to delete message' })
+            showNotify({ type: 'danger', message: '删除失败' })
         }
     }
 }
@@ -512,7 +505,7 @@ const sendTestMessage = () => {
         testMessagePriority.value
     )
     showTestMessageDialog.value = false
-    showNotify({ type: 'success', message: 'Test message sent' })
+    showNotify({ type: 'success', message: '测试消息已发送' })
 }
 
 // 工具方法

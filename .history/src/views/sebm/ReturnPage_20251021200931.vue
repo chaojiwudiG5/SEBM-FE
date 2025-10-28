@@ -4,7 +4,7 @@
  * @Author: GaoMingze
  * @Date: 2025-01-27 00:00:00
  * @LastEditors: GaoMingze
- * @LastEditTime: 2025-10-28 22:23:26
+ * @LastEditTime: 2025-10-21 20:09:30
 -->
 <template>
     <div class="return-page">
@@ -239,7 +239,7 @@ const fenceCenters = [
     { latitude: 1.278156, longitude: 103.78704 }, // 第一个坐标点
     { latitude: 1.292324, longitude: 103.776167 }, // 第二个坐标点
 ]
-const fenceRadius = 10000000 // 1000米半径
+const fenceRadius = 1000 // 1000米半径
 
 // 表单数据
 const formData = ref({
@@ -613,8 +613,6 @@ const handleSubmit = async () => {
         await showConfirmDialog({
             title: 'Confirm Return',
             message: confirmMessage,
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
         })
 
         submitting.value = true
@@ -624,9 +622,7 @@ const handleSubmit = async () => {
             id: borrowRecord.value.id!,
             latitude: currentLocation.value.latitude.toString(),
             longitude: currentLocation.value.longitude.toString(),
-            returnTime: new Date(
-                Date.now() - new Date().getTimezoneOffset() * 60000
-            ).toISOString(),
+            returnTime: formData.value.returnTime,
             remarks: formData.value.remarks,
         }
 

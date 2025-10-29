@@ -9,7 +9,7 @@ import { showNotify } from 'vant'
 const getBaseURL = () => {
     // 开发环境
     if (import.meta.env.DEV) {
-        return 'http://localhost:29578'
+        return 'https://sebm-production.up.railway.app'
     }
     // 生产环境
     return 'https://sebm-production.up.railway.app'

@@ -5,14 +5,20 @@
  */
 import axios from 'axios'
 import { showNotify } from 'vant'
-
+// 根据环境自动选择后端地址
+const getBaseURL = () => {
+    // 开发环境
+    if (import.meta.env.DEV) {
+        return 'https://sebm-production.up.railway.app'
+    }
+    // 生产环境
+    return 'https://sebm-production.up.railway.app'
+}
 // 创建 Axios 实例
 const myAxios = axios.create({
-    baseURL: 'https://localhost:29578', // 修改为你的后端地址
+    baseURL: getBaseURL(),
     timeout: 60000,
-    withCredentials: true,
 })
-
 // 请求拦截器：自动带上 token
 myAxios.interceptors.request.use(
     function (config) {
@@ -26,7 +32,6 @@ myAxios.interceptors.request.use(
         return Promise.reject(error)
     }
 )
-
 // 响应拦截器
 myAxios.interceptors.response.use(
     function (response) {
@@ -48,5 +53,4 @@ myAxios.interceptors.response.use(
         return Promise.reject(error)
     }
 )
-
 export default myAxios

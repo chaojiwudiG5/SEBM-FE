@@ -16,7 +16,7 @@ export async function getUploadUrl(
     params: API.getUploadUrlParams,
     options?: { [key: string]: any }
 ) {
-    return request<API.BaseResponseMapStringString>('/api/oss/uploadUrl', {
+    return request<API.BaseResponseMapStringString>('/oss/uploadUrl', {
         method: 'GET',
         params: {
             ...params,

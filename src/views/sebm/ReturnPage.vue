@@ -15,7 +15,7 @@
                 :title="deviceInfo.deviceName"
                 :desc="deviceInfo.description || 'No description'"
                 :thumb="
-                    deviceInfo.image ||
+                    ensureHttps(deviceInfo.image) ||
                     'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'
                 "
                 class="device-card"
@@ -217,6 +217,7 @@ import { getDevice } from '../../api/device'
 import { getBorrowRecordListWithStatus, returnDevice } from '../../api/borrow'
 import { createMaintenanceRecord } from '../../api/userMaintenanceRecord'
 import { getUploadUrl } from '../../api/ossController'
+import { ensureHttps } from '../../utils/url'
 
 const route = useRoute()
 const router = useRouter()
@@ -505,13 +506,13 @@ const handleFileUpload = async (file: any) => {
             )
         }
 
-        // 保存文件URL
-        maintenanceForm.value.fileUrl = fileUrl
+        // 保存文件URL（确保使用HTTPS）
+        maintenanceForm.value.fileUrl = ensureHttps(fileUrl)
 
-        // 更新文件列表显示
+        // 更新文件列表显示（确保使用HTTPS）
         fileList.value = [
             {
-                url: fileUrl,
+                url: ensureHttps(fileUrl),
                 name: file.file.name,
                 status: 'done',
             },

@@ -28,7 +28,7 @@
                         :key="task.id"
                         :title="`Device ID: ${task.deviceId}`"
                         :desc="task.description || 'No description'"
-                        :thumb="task.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
+                        :thumb="ensureHttps(task.image) || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
                         class="task-card in-progress-card"
                     >
                         <template #footer>
@@ -89,7 +89,7 @@
                 :key="task.id"
                         :title="`Device ID: ${task.deviceId}`"
                         :desc="task.description || 'No description'"
-                        :thumb="task.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
+                        :thumb="ensureHttps(task.image) || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
                         class="task-card completed-card"
                     >
                         <template #footer>
@@ -128,6 +128,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useUserStore } from '../../store/user'
 import { listMyTasks } from '../../api/mechanicanMaintenanceRecord'
+import { ensureHttps } from '../../utils/url'
 
 const userStore = useUserStore()
 

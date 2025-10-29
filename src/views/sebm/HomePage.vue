@@ -79,7 +79,7 @@
                         v-for="record in usingRecords"
                         :key="record.id"
                         :title="record.deviceName"
-                        :thumb="record.image"
+                        :thumb="ensureHttps(record.image)"
                         class="device-card"
                     >
                         <template #footer>
@@ -115,11 +115,11 @@
                 </template>
                 <van-empty v-if="returnedRecords.length === 0" description="No returned records" />
                 <div v-else>
-        <van-card
+                    <van-card
                         v-for="record in returnedRecords"
                         :key="record.id"
                         :title="record.deviceName"
-                        :thumb="record.image"
+                        :thumb="ensureHttps(record.image)"
                         class="device-card"
                     >
                         <template #footer>
@@ -176,7 +176,7 @@
                         :key="record.id"
                         :title="record.deviceName || 'Unknown Device'"
                         :desc="record.description || 'No description'"
-                        :thumb="record.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
+                        :thumb="ensureHttps(record.image) || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
                         class="device-card maintenance-card"
                     >
                         <template #footer>
@@ -201,6 +201,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useUserStore } from '../../store/user'
 import { getBorrowRecordListWithStatus } from '../../api/borrow'
 import { listMyRecords } from '../../api/userMaintenanceRecord'
+import { ensureHttps } from '../../utils/url'
 
 const userStore = useUserStore()
 

@@ -81,7 +81,7 @@
                         v-for="device in deviceList"
                         :key="device.id"
                         :title="device.deviceName"
-                        :thumb="device.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
+                        :thumb="ensureHttps(device.image) || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
                         class="device-card"
                     >
                         <template #desc>
@@ -124,6 +124,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { getDeviceList } from '../../api/device'
+import { ensureHttps } from '../../utils/url'
 
 // 筛选参数
 const filterParams = ref({

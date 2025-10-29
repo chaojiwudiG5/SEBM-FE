@@ -14,7 +14,7 @@
                 v-if="deviceInfo"
                 :title="deviceInfo.deviceName"
                 :desc="deviceInfo.description || 'No description'"
-                :thumb="deviceInfo.image || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
+                :thumb="ensureHttps(deviceInfo.image) || 'https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg'"
                 class="device-card"
             >
                 <template #tags>
@@ -143,6 +143,7 @@ import { useUserStore } from '../../store/user'
 import { getDevice } from '../../api/device'
 import { borrowDevice } from '../../api/borrow'
 import { showNotify, showConfirmDialog } from 'vant'
+import { ensureHttps } from '../../utils/url'
 
 const route = useRoute()
 const router = useRouter()

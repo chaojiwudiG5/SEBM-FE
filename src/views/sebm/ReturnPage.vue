@@ -474,7 +474,9 @@ const handleFileUpload = async (file: any) => {
         console.log('file to upload:', file.file)
 
         // 上传文件到OSS
-        const uploadResponse = await fetch(uploadUrl, {
+        const httpsUploadUrl = ensureHttps(uploadUrl)
+        console.log('httpsUploadUrl:', httpsUploadUrl)
+        const uploadResponse = await fetch(httpsUploadUrl, {
             method: 'PUT',
             body: file.file,
             headers: {

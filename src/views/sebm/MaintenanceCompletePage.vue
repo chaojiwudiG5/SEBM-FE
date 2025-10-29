@@ -240,9 +240,10 @@ const handleFileUpload = async (file: any) => {
         }
 
         const { uploadUrl, fileUrl } = uploadUrlResponse
-
+        const httpsUploadUrl = ensureHttps(uploadUrl)
+        console.log('httpsUploadUrl:', httpsUploadUrl)
         // 上传文件到OSS
-        const uploadResponse = await fetch(uploadUrl, {
+        const uploadResponse = await fetch(httpsUploadUrl, {
             method: 'PUT',
             body: file.file,
             headers: {
